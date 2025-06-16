@@ -1,0 +1,28 @@
+.App {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.main-content {
+  padding: 2rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.container h2 {
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.container p {
+  color: #6b7280;
+  font-size: 1.1rem;
+}

@@ -1,0 +1,119 @@
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.wallet-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.wallet-connected {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.wallet-address {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+.auth-status {
+  color: #4ade80;
+  font-weight: bold;
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.auth-button, .logout-button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.auth-button:hover {
+  background: #059669;
+}
+
+.auth-button:disabled {
+  background: #6b7280;
+  cursor: not-allowed;
+}
+
+.logout-button {
+  background: #ef4444;
+}
+
+.logout-button:hover {
+  background: #dc2626;
+}
+
+.error-message {
+  background: #fef2f2;
+  color: #dc2626;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-top: 1rem;
+  border: 1px solid #fecaca;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Override wallet adapter button styles */
+.wallet-adapter-button {
+  background: #10b981 !important;
+  border-radius: 6px !important;
+  font-size: 0.9rem !important;
+  padding: 0.5rem 1rem !important;
+}
+
+.wallet-adapter-button:hover {
+  background: #059669 !important;
+}
+
+.wallet-adapter-button-trigger {
+  background: #ef4444 !important;
+}
+
+.wallet-adapter-button-trigger:hover {
+  background: #dc2626 !important;
+}

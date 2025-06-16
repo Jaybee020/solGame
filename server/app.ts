@@ -1,0 +1,84 @@
+import mongoose from "mongoose";
+import { MONGO_URI, REDIS_URL } from "./config/constants";
+import { createServer } from "http";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerUi from "swagger-ui-express";
+import Redis from "ioredis";
+import cors from "cors";
+import morgan from "morgan";
+import express, { Request, Response } from "express";
+import cookieParser from "cookie-parser";
+import { json, urlencoded } from "body-parser";
+import { consoleLogger } from "./services/logger/pinoLogger";
+import authRouter from "./routes/auth";
+
+const PORT = process.env.PORT || 8000;
+const app = express();
+const httpServer = createServer(app);
+export const redisClient = new Redis(REDIS_URL);
+
+// const options = {
+//   definition: {
+//     openapi: "3.0.1",
+//     info: {
+//       title: "Solana Txn Coder docs api",
+//       version: "1.0.0",
+//     },
+//     components: {
+//       securitySchemes: {
+//         bearerAuth: {
+//           type: "apiKey",
+//           scheme: "bearer",
+//           name: "Authorization",
+//           in: "header",
+//         },
+//       },
+//     },
+//     security: [
+//       {
+//         bearerAuth: [],
+//       },
+//     ],
+//   },
+//   apis: ["./services/api/*"],
+// };
+// const openapiSpecification = swaggerJSDoc(options);
+
+mongoose
+  .connect(MONGO_URI, { maxPoolSize: 10000, serverSelectionTimeoutMS: 5000 })
+  .then(() => {
+    console.log("Connected to the database");
+  })
+  .catch((err) => {
+    console.log(err);
+    console.error("Could not connect to database");
+  });
+
+async function Mainrun() {
+  try {
+    app.use(morgan("dev"));
+    // app.use(
+    //   "/api-docs",
+    //   swaggerUi.serve,
+    //   swaggerUi.setup(openapiSpecification)
+    // );
+    app.get("", async (req: Request, res: Response) => {
+      res.status(200).send("Pinged Server");
+    });
+
+    app.use(cors());
+    app.use(urlencoded({ extended: true }));
+    app.use(json({ limit: "50mb" }));
+    app.use(cookieParser());
+    app.use("/auth", authRouter);
+
+    //@ts-ignore
+    httpServer.listen(PORT, "0.0.0.0", async (error) => {
+      consoleLogger.info("Started listening on port", PORT);
+    });
+  } catch (error) {
+    consoleLogger.info("Occured Mainrun", error);
+  }
+}
+
+Mainrun();
