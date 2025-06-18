@@ -24,11 +24,12 @@ export interface AuthService {
   getProfile: (authToken: string) => Promise<any>;
 }
 
+export const SERVER_API_KEY = process.env.SERVER_API_KEY || "server-key";
 export class AuthServiceImpl implements AuthService {
   private apiKey: string;
 
   constructor(apiKey?: string) {
-    this.apiKey = process.env.SERVER_API_KEY || "Jaybee";
+    this.apiKey = SERVER_API_KEY;
   }
 
   async login(

@@ -1,29 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { WalletDisconnectButton, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
-import { useAuth } from '../contexts/AuthContext';
-import { authService, createSignMessage } from '../services/authService';
-import bs58 from 'bs58';
-import './Header.css';
+import React, { useCallback, useEffect, useState } from "react";
+import { useWallet } from "@solana/wallet-adapter-react";
+import {
+  WalletDisconnectButton,
+  WalletMultiButton,
+} from "@solana/wallet-adapter-react-ui";
+import { useAuth } from "../contexts/AuthContext";
+import {
+  authService,
+  createSignMessage,
+  SERVER_API_KEY,
+} from "../services/authService";
+import bs58 from "bs58";
+import "./Header.css";
 
 const Header: React.FC = () => {
-  const { wallet, publicKey, signMessage, connected, disconnect } = useWallet();
-  const { walletAddress, authToken, isAuthenticated, setWalletAddress, setAuthToken, logout } = useAuth();
+  const { publicKey, signMessage, connected, disconnect } = useWallet();
+  const {
+    walletAddress,
+    authToken,
+    isAuthenticated,
+    setWalletAddress,
+    setAuthToken,
+    logout,
+  } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (connected && publicKey) {
-      setWalletAddress(publicKey.toString());
-    } else {
-      setWalletAddress(null);
-      setAuthToken(null);
-    }
-  }, [connected, publicKey, setWalletAddress, setAuthToken]);
-
-  const handleAuthenticate = async () => {
+  const handleAuthenticate = useCallback(async () => {
     if (!publicKey || !signMessage) {
-      setError('Wallet not connected or does not support signing');
+      setError("Wallet not connected or does not support signing");
       return;
     }
 
@@ -43,18 +48,52 @@ const Header: React.FC = () => {
       );
 
       if (response.success) {
-        setAuthToken(response.authToken);
-        console.log('Authentication successful:', response.message);
+        setAuthToken(`${SERVER_API_KEY}:${response.authToken}`);
+        console.log("Authentication successful:", response.message);
       } else {
-        setError('Authentication failed');
+        setError("Authentication failed");
       }
     } catch (err) {
       setError(`Authentication error: ${err}`);
-      console.error('Authentication error:', err);
+      console.error("Authentication error:", err);
     } finally {
       setIsAuthenticating(false);
     }
-  };
+  }, [publicKey, signMessage, setAuthToken]);
+
+  useEffect(() => {
+    if (connected && publicKey) {
+      setWalletAddress(publicKey.toString());
+      if (!isAuthenticated) {
+        handleAuthenticate();
+      }
+    } else {
+      setWalletAddress(null);
+      setAuthToken(null);
+    }
+  }, [
+    connected,
+    publicKey,
+    setWalletAddress,
+    setAuthToken,
+    isAuthenticated,
+    handleAuthenticate,
+  ]);
+
+  useEffect(() => {
+    if (!connected && isAuthenticated && authToken) {
+      const performLogout = async () => {
+        try {
+          await authService.logout(authToken);
+        } catch (err) {
+          console.error("Logout error during wallet disconnect:", err);
+        } finally {
+          logout();
+        }
+      };
+      performLogout();
+    }
+  }, [connected, isAuthenticated, authToken, logout]);
 
   const handleLogout = async () => {
     try {
@@ -64,7 +103,7 @@ const Header: React.FC = () => {
       logout();
       disconnect();
     } catch (err) {
-      console.error('Logout error:', err);
+      console.error("Logout error:", err);
       // Still perform local logout even if server logout fails
       logout();
       disconnect();
@@ -89,21 +128,8 @@ const Header: React.FC = () => {
                 )}
               </div>
               <div className="wallet-actions">
-                {!isAuthenticated ? (
-                  <button 
-                    className="auth-button"
-                    onClick={handleAuthenticate}
-                    disabled={isAuthenticating}
-                  >
-                    {isAuthenticating ? 'Authenticating...' : 'Sign & Authenticate'}
-                  </button>
-                ) : (
-                  <button 
-                    className="logout-button"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </button>
+                {!isAuthenticated && isAuthenticating && (
+                  <span className="auth-status">Authenticating...</span>
                 )}
                 <WalletDisconnectButton />
               </div>
@@ -111,11 +137,7 @@ const Header: React.FC = () => {
           )}
         </div>
       </div>
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
     </header>
   );
 };

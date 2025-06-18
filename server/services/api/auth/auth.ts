@@ -47,7 +47,7 @@ export const authenticatetoken = function (req: Req, res: Response, next: any) {
 
     UserModel.findByToken(token, (err: Error, user: UserDocument | null) => {
       if (err) {
-        res.status(500).json({ success: false, message: "Database error." });
+        res.status(500).json({ success: false, message: "Database error" });
         return;
       }
       if (!user) {
