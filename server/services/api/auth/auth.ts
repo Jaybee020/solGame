@@ -15,33 +15,53 @@ export interface Req extends Request {
 }
 
 export const authenticatetoken = function (req: Req, res: Response, next: any) {
-  if (!req.headers.authorization) {
-    throw Error("Wrong Authorization Token");
-  }
-  const [serverKey, token] = req.headers.authorization!.split(":");
+  try {
+    if (!req.headers.authorization) {
+      res
+        .status(401)
+        .json({ success: false, message: "No authorization header" });
+      return;
+    }
 
-  if (serverKey !== SERVER_API_KEY) {
-    throw Error("Wrong API Key");
-  }
-  //auth header should take the form "JWT TOKEN_VALUE"
-  //   const authHeader = req.headers.authorization;
-  if (token) {
+    const authHeader = req.headers.authorization;
+    const parts = authHeader.split(":");
+
+    if (parts.length !== 2) {
+      res
+        .status(401)
+        .json({ success: false, message: "Invalid authorization format" });
+      return;
+    }
+
+    const [serverKey, token] = parts;
+
+    if (serverKey !== SERVER_API_KEY) {
+      res.status(401).json({ success: false, message: "Invalid API key" });
+      return;
+    }
+
+    if (!token) {
+      res.status(401).json({ success: false, message: "No token provided" });
+      return;
+    }
+
     UserModel.findByToken(token, (err: Error, user: UserDocument | null) => {
       if (err) {
-        console.error(err);
+        res.status(500).json({ success: false, message: "Database error." });
+        return;
       }
       if (!user) {
-        res
-          .status(403)
-          .send({ auth: false, message: "Authentication Failed!" });
+        res.status(401).json({ success: false, message: "Invalid token" });
+        return;
       } else {
         req.token = token;
         req.user = user;
         next();
       }
     });
-  } else {
-    res.status(403).send({ auth: false, message: "Wrong cookie!" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Authentication error" });
+    return;
   }
 };
 
@@ -57,6 +77,7 @@ export const authenticateAPIKey = function (
 
   if (serverKey !== SERVER_API_KEY) {
     res.status(403).send({ auth: false, message: "Wrong cookie!" });
+    return;
   }
   next();
 };
@@ -73,6 +94,7 @@ export const authenticateAdminAPIKey = function (
 
   if (serverKey !== SERVER_API_KEY) {
     res.status(403).send({ auth: false, message: "Wrong cookie!" });
+    return;
   }
   next();
 };
@@ -92,7 +114,7 @@ export const validateRequest =
 
     if (error) {
       // Respond with validation errors
-      return res.status(400).json({
+      res.status(400).json({
         status: "error",
         message: "Validation failed",
         errors: error.details.map((err) => ({

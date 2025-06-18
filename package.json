@@ -13,6 +13,8 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "jest": "^30.0.0",
+    "save": "^2.9.0"
   }
 }

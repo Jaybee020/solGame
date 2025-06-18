@@ -14,7 +14,7 @@ export interface IUser {
 }
 
 export interface UserDocument extends IUser, Document {
-  generatetoken(arg0: (err: Error, token: string) => Promise<void>): unknown;
+  generatetoken(arg0: (err: Error, token: string) => void): unknown;
 }
 
 export interface UserModel extends Model<UserDocument> {

@@ -11,6 +11,7 @@ import cookieParser from "cookie-parser";
 import { json, urlencoded } from "body-parser";
 import { consoleLogger } from "./services/logger/pinoLogger";
 import authRouter from "./routes/auth";
+import gameRouter from "./routes/games";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -71,6 +72,7 @@ async function Mainrun() {
     app.use(json({ limit: "50mb" }));
     app.use(cookieParser());
     app.use("/auth", authRouter);
+    app.use("/games", gameRouter);
 
     //@ts-ignore
     httpServer.listen(PORT, "0.0.0.0", async (error) => {
