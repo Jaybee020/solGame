@@ -3,6 +3,7 @@ import { GameType } from "../../types/game";
 import { BlackjackProvider } from "../../providers/BlackjackProvider";
 import { DiceProvider } from "../../providers/DiceProvider";
 import { SlotsProvider } from "../../providers/SlotsProvider";
+import { ShipCaptainCrewProvider } from "../../providers/ShipCaptainCrewProvider";
 
 describe("GameFactory", () => {
   describe("getProvider", () => {
@@ -10,14 +11,17 @@ describe("GameFactory", () => {
       const blackjackProvider = GameFactory.getProvider("blackjack");
       const diceProvider = GameFactory.getProvider("dice");
       const slotsProvider = GameFactory.getProvider("slots");
+      const shipCaptainCrewProvider = GameFactory.getProvider("shipcaptaincrew");
 
       expect(blackjackProvider).toBeInstanceOf(BlackjackProvider);
       expect(diceProvider).toBeInstanceOf(DiceProvider);
       expect(slotsProvider).toBeInstanceOf(SlotsProvider);
+      expect(shipCaptainCrewProvider).toBeInstanceOf(ShipCaptainCrewProvider);
 
       expect(blackjackProvider.gameType).toBe("blackjack");
       expect(diceProvider.gameType).toBe("dice");
       expect(slotsProvider.gameType).toBe("slots");
+      expect(shipCaptainCrewProvider.gameType).toBe("shipcaptaincrew");
     });
 
     it("should throw error for invalid game type", () => {
@@ -41,14 +45,15 @@ describe("GameFactory", () => {
       expect(supportedGames).toContain("blackjack");
       expect(supportedGames).toContain("dice");
       expect(supportedGames).toContain("slots");
-      expect(supportedGames).toHaveLength(3);
+      expect(supportedGames).toContain("shipcaptaincrew");
+      expect(supportedGames).toHaveLength(4);
     });
 
     it("should return array of valid game types", () => {
       const supportedGames = GameFactory.getSupportedGames();
 
       supportedGames.forEach((gameType) => {
-        expect(["blackjack", "dice", "slots"]).toContain(gameType);
+        expect(["blackjack", "dice", "slots", "shipcaptaincrew"]).toContain(gameType);
       });
     });
   });
@@ -58,6 +63,7 @@ describe("GameFactory", () => {
       expect(GameFactory.validateGameType("blackjack")).toBe(true);
       expect(GameFactory.validateGameType("dice")).toBe(true);
       expect(GameFactory.validateGameType("slots")).toBe(true);
+      expect(GameFactory.validateGameType("shipcaptaincrew")).toBe(true);
     });
 
     it("should return false for invalid game types", () => {
@@ -81,6 +87,7 @@ describe("GameFactory", () => {
       const blackjackConfig = GameFactory.getGameConfig("blackjack");
       const diceConfig = GameFactory.getGameConfig("dice");
       const slotsConfig = GameFactory.getGameConfig("slots");
+      const shipCaptainCrewConfig = GameFactory.getGameConfig("shipcaptaincrew");
 
       // Test blackjack config
       expect(blackjackConfig.minBet).toBe(0.01);
@@ -98,7 +105,13 @@ describe("GameFactory", () => {
       expect(slotsConfig.minBet).toBe(0.01);
       expect(slotsConfig.maxBet).toBe(50);
       expect(slotsConfig.baseMultiplier).toBe(1);
-      expect(slotsConfig.houseEdge).toBe(0.04);
+      expect(slotsConfig.houseEdge).toBe(0.03); // Updated for 97% RTP
+
+      // Test shipcaptaincrew config
+      expect(shipCaptainCrewConfig.minBet).toBe(0.01);
+      expect(shipCaptainCrewConfig.maxBet).toBe(100);
+      expect(shipCaptainCrewConfig.baseMultiplier).toBe(1);
+      expect(shipCaptainCrewConfig.houseEdge).toBe(0.05);
     });
 
     it("should throw error for invalid game type", () => {
@@ -201,9 +214,9 @@ describe("GameFactory", () => {
       const supportedGames = GameFactory.getSupportedGames();
 
       // Should have exactly the expected games
-      expect(supportedGames).toHaveLength(4);
+      expect(supportedGames).toHaveLength(5);
       expect(supportedGames).toEqual(
-        expect.arrayContaining(["blackjack", "dice", "slots", "test_game"])
+        expect.arrayContaining(["blackjack", "dice", "slots", "shipcaptaincrew", "test_game"])
       );
 
       // Each provider should be properly configured
@@ -264,7 +277,7 @@ describe("GameFactory", () => {
     it("should handle concurrent access correctly", () => {
       // Simulate multiple concurrent requests for providers
       const promises = [];
-      const gameTypes: GameType[] = ["blackjack", "dice", "slots"];
+      const gameTypes: GameType[] = ["blackjack", "dice", "slots", "shipcaptaincrew"];
 
       for (let i = 0; i < 100; i++) {
         const gameType = gameTypes[i % gameTypes.length];

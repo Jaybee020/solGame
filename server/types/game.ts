@@ -1,4 +1,4 @@
-export type GameType = 'blackjack' | 'dice' | 'slots';
+export type GameType = 'blackjack' | 'dice' | 'slots' | 'shipcaptaincrew';
 
 export interface GameConfig {
   minBet: number;

@@ -14,21 +14,40 @@ interface BlackjackGameData {
   nonce: number;
   playerHand: Card[];
   dealerHand: Card[];
+  splitHand?: Card[];
   deck: Card[];
-  gamePhase: 'dealing' | 'player_turn' | 'dealer_turn' | 'finished';
+  gamePhase: 'dealing' | 'player_turn' | 'split_turn' | 'dealer_turn' | 'finished';
   playerTotal: number;
   dealerTotal: number;
+  splitTotal?: number;
   canDoubleDown: boolean;
   canSplit: boolean;
+  canSurrender: boolean;
+  isSplit: boolean;
+  currentHand: 'main' | 'split';
+  actionHistory: GameAction[];
+}
+
+interface GameAction {
+  hand: 'main' | 'split' | 'dealer';
+  action: string;
+  cards?: Card[];
+  timestamp: number;
+  result?: string;
 }
 
 interface BlackjackResult {
   playerHand: Card[];
   dealerHand: Card[];
+  splitHand?: Card[];
   playerTotal: number;
   dealerTotal: number;
-  outcome: 'win' | 'lose' | 'push' | 'blackjack';
+  splitTotal?: number;
+  outcome: 'win' | 'lose' | 'push' | 'blackjack' | 'surrender';
+  splitOutcome?: 'win' | 'lose' | 'push' | 'blackjack';
   isWin: boolean;
+  isSplitWin?: boolean;
+  actionHistory: GameAction[];
 }
 
 export class BlackjackProvider extends BaseGameProvider {
@@ -84,6 +103,22 @@ export class BlackjackProvider extends BaseGameProvider {
     return total;
   }
 
+  private isSoftTotal(hand: Card[]): boolean {
+    let aces = 0;
+    let total = 0;
+    
+    for (const card of hand) {
+      if (card.rank === 1) {
+        aces++;
+        total += 11;
+      } else {
+        total += card.value;
+      }
+    }
+    
+    return aces > 0 && total <= 21;
+  }
+
   private isBlackjack(hand: Card[]): boolean {
     return hand.length === 2 && this.calculateHandValue(hand) === 21;
   }
@@ -108,7 +143,21 @@ export class BlackjackProvider extends BaseGameProvider {
       playerTotal: this.calculateHandValue(playerHand),
       dealerTotal: this.calculateHandValue(dealerHand),
       canDoubleDown: true,
-      canSplit: playerHand[0].rank === playerHand[1].rank
+      canSplit: playerHand[0].rank === playerHand[1].rank,
+      canSurrender: true,
+      isSplit: false,
+      currentHand: 'main',
+      actionHistory: [{
+        hand: 'main',
+        action: 'deal',
+        cards: playerHand,
+        timestamp: Date.now()
+      }, {
+        hand: 'dealer',
+        action: 'deal',
+        cards: [dealerHand[0]],
+        timestamp: Date.now()
+      }]
     };
 
     return {
@@ -133,6 +182,10 @@ export class BlackjackProvider extends BaseGameProvider {
         return this.handleStand(gameData, state);
       case 'double':
         return this.handleDouble(gameData, state);
+      case 'split':
+        return this.handleSplit(gameData, state);
+      case 'surrender':
+        return this.handleSurrender(gameData, state);
       default:
         return this.autoPlay(gameData, state);
     }
@@ -162,12 +215,48 @@ export class BlackjackProvider extends BaseGameProvider {
       throw new Error('No cards left in deck');
     }
 
-    gameData.playerHand.push(gameData.deck.shift()!);
-    gameData.playerTotal = this.calculateHandValue(gameData.playerHand);
+    const newCard = gameData.deck.shift()!;
+    const currentHand = gameData.currentHand === 'split' ? gameData.splitHand! : gameData.playerHand;
+    
+    currentHand.push(newCard);
+    
+    if (gameData.currentHand === 'split') {
+      gameData.splitTotal = this.calculateHandValue(gameData.splitHand!);
+    } else {
+      gameData.playerTotal = this.calculateHandValue(gameData.playerHand);
+    }
+    
     gameData.canDoubleDown = false;
+    gameData.canSurrender = false;
+    
+    gameData.actionHistory.push({
+      hand: gameData.currentHand,
+      action: 'hit',
+      cards: [newCard],
+      timestamp: Date.now()
+    });
 
-    if (gameData.playerTotal > 21) {
-      return this.finishGame(gameData, state, 'lose');
+    const currentTotal = gameData.currentHand === 'split' ? gameData.splitTotal! : gameData.playerTotal;
+    
+    if (currentTotal > 21) {
+      if (gameData.isSplit && gameData.currentHand === 'main') {
+        gameData.currentHand = 'split';
+        gameData.gamePhase = 'split_turn';
+        gameData.canDoubleDown = gameData.splitHand!.length === 2;
+        
+        state.currentData = gameData;
+        return {
+          isWin: false,
+          multiplier: 0,
+          winAmount: 0,
+          gameData: this.getGameDataForResponse(gameData),
+          outcome: { action: 'hit', hand: 'main', bust: true, status: 'continue_split' }
+        };
+      } else if (gameData.isSplit && gameData.currentHand === 'split') {
+        return this.dealerPlay(gameData, state);
+      } else {
+        return this.finishGame(gameData, state, 'lose');
+      }
     }
 
     state.currentData = gameData;
@@ -175,20 +264,34 @@ export class BlackjackProvider extends BaseGameProvider {
       isWin: false,
       multiplier: 0,
       winAmount: 0,
-      gameData: {
-        playerHand: gameData.playerHand,
-        dealerHand: gameData.dealerHand,
-        playerTotal: gameData.playerTotal,
-        dealerTotal: gameData.dealerTotal,
-        gamePhase: gameData.gamePhase,
-        canDoubleDown: gameData.canDoubleDown,
-        canSplit: gameData.canSplit
-      },
-      outcome: { action: 'hit', playerTotal: gameData.playerTotal, status: 'continue' }
+      gameData: this.getGameDataForResponse(gameData),
+      outcome: { action: 'hit', hand: gameData.currentHand, total: currentTotal, status: 'continue' }
     };
   }
 
   private async handleStand(gameData: BlackjackGameData, state: GameState): Promise<GameResult> {
+    gameData.actionHistory.push({
+      hand: gameData.currentHand,
+      action: 'stand',
+      timestamp: Date.now()
+    });
+    
+    if (gameData.isSplit && gameData.currentHand === 'main') {
+      gameData.currentHand = 'split';
+      gameData.gamePhase = 'split_turn';
+      gameData.canDoubleDown = gameData.splitHand!.length === 2;
+      gameData.canSurrender = false;
+      
+      state.currentData = gameData;
+      return {
+        isWin: false,
+        multiplier: 0,
+        winAmount: 0,
+        gameData: this.getGameDataForResponse(gameData),
+        outcome: { action: 'stand', hand: 'main', status: 'continue_split' }
+      };
+    }
+    
     return this.dealerPlay(gameData, state);
   }
 
@@ -198,23 +301,160 @@ export class BlackjackProvider extends BaseGameProvider {
     }
 
     gameData.betAmount *= 2;
-    gameData.playerHand.push(gameData.deck.shift()!);
-    gameData.playerTotal = this.calculateHandValue(gameData.playerHand);
+    const newCard = gameData.deck.shift()!;
+    const currentHand = gameData.currentHand === 'split' ? gameData.splitHand! : gameData.playerHand;
+    
+    currentHand.push(newCard);
+    
+    if (gameData.currentHand === 'split') {
+      gameData.splitTotal = this.calculateHandValue(gameData.splitHand!);
+    } else {
+      gameData.playerTotal = this.calculateHandValue(gameData.playerHand);
+    }
+    
+    gameData.actionHistory.push({
+      hand: gameData.currentHand,
+      action: 'double',
+      cards: [newCard],
+      timestamp: Date.now()
+    });
 
-    if (gameData.playerTotal > 21) {
-      return this.finishGame(gameData, state, 'lose');
+    const currentTotal = gameData.currentHand === 'split' ? gameData.splitTotal! : gameData.playerTotal;
+    
+    if (currentTotal > 21) {
+      if (gameData.isSplit && gameData.currentHand === 'main') {
+        gameData.currentHand = 'split';
+        gameData.gamePhase = 'split_turn';
+        gameData.canDoubleDown = gameData.splitHand!.length === 2;
+        
+        state.currentData = gameData;
+        return {
+          isWin: false,
+          multiplier: 0,
+          winAmount: 0,
+          gameData: this.getGameDataForResponse(gameData),
+          outcome: { action: 'double', hand: 'main', bust: true, status: 'continue_split' }
+        };
+      } else if (gameData.isSplit && gameData.currentHand === 'split') {
+        return this.dealerPlay(gameData, state);
+      } else {
+        return this.finishGame(gameData, state, 'lose');
+      }
+    }
+    
+    if (gameData.isSplit && gameData.currentHand === 'main') {
+      gameData.currentHand = 'split';
+      gameData.gamePhase = 'split_turn';
+      gameData.canDoubleDown = gameData.splitHand!.length === 2;
+      
+      state.currentData = gameData;
+      return {
+        isWin: false,
+        multiplier: 0,
+        winAmount: 0,
+        gameData: this.getGameDataForResponse(gameData),
+        outcome: { action: 'double', hand: 'main', status: 'continue_split' }
+      };
     }
 
     return this.dealerPlay(gameData, state);
+  }
+  
+  private async handleSplit(gameData: BlackjackGameData, state: GameState): Promise<GameResult> {
+    if (!gameData.canSplit) {
+      throw new Error('Cannot split');
+    }
+    
+    if (gameData.isSplit) {
+      throw new Error('Already split');
+    }
+
+    gameData.isSplit = true;
+    gameData.splitHand = [gameData.playerHand.pop()!];
+    gameData.splitHand.push(gameData.deck.shift()!);
+    gameData.playerHand.push(gameData.deck.shift()!);
+    
+    gameData.playerTotal = this.calculateHandValue(gameData.playerHand);
+    gameData.splitTotal = this.calculateHandValue(gameData.splitHand);
+    
+    gameData.canSplit = false;
+    gameData.canDoubleDown = true;
+    gameData.canSurrender = false;
+    gameData.currentHand = 'main';
+    gameData.gamePhase = 'player_turn';
+    
+    gameData.actionHistory.push({
+      hand: 'main',
+      action: 'split',
+      cards: gameData.playerHand,
+      timestamp: Date.now()
+    });
+    
+    gameData.actionHistory.push({
+      hand: 'split',
+      action: 'split',
+      cards: gameData.splitHand,
+      timestamp: Date.now()
+    });
+
+    state.currentData = gameData;
+    return {
+      isWin: false,
+      multiplier: 0,
+      winAmount: 0,
+      gameData: this.getGameDataForResponse(gameData),
+      outcome: { action: 'split', status: 'continue' }
+    };
+  }
+  
+  private async handleSurrender(gameData: BlackjackGameData, state: GameState): Promise<GameResult> {
+    if (!gameData.canSurrender) {
+      throw new Error('Cannot surrender');
+    }
+    
+    gameData.actionHistory.push({
+      hand: gameData.currentHand,
+      action: 'surrender',
+      timestamp: Date.now()
+    });
+
+    return this.finishGame(gameData, state, 'surrender');
   }
 
   private async dealerPlay(gameData: BlackjackGameData, state: GameState): Promise<GameResult> {
     gameData.dealerHand.push(gameData.deck.shift()!);
     gameData.dealerTotal = this.calculateHandValue(gameData.dealerHand);
+    
+    gameData.actionHistory.push({
+      hand: 'dealer',
+      action: 'hit',
+      cards: [gameData.dealerHand[gameData.dealerHand.length - 1]],
+      timestamp: Date.now()
+    });
 
-    while (gameData.dealerTotal < 17) {
-      gameData.dealerHand.push(gameData.deck.shift()!);
+    // Dealer hits on soft 17
+    while (gameData.dealerTotal < 17 || (gameData.dealerTotal === 17 && this.isSoftTotal(gameData.dealerHand))) {
+      const newCard = gameData.deck.shift()!;
+      gameData.dealerHand.push(newCard);
       gameData.dealerTotal = this.calculateHandValue(gameData.dealerHand);
+      
+      gameData.actionHistory.push({
+        hand: 'dealer',
+        action: 'hit',
+        cards: [newCard],
+        timestamp: Date.now()
+      });
+    }
+    
+    gameData.actionHistory.push({
+      hand: 'dealer',
+      action: 'stand',
+      timestamp: Date.now(),
+      result: `dealer total: ${gameData.dealerTotal}`
+    });
+
+    if (gameData.isSplit) {
+      return this.finishSplitGame(gameData, state);
     }
 
     if (gameData.dealerTotal > 21) {
@@ -228,7 +468,7 @@ export class BlackjackProvider extends BaseGameProvider {
     }
   }
 
-  private finishGame(gameData: BlackjackGameData, state: GameState, outcome: 'win' | 'lose' | 'push' | 'blackjack'): GameResult {
+  private finishGame(gameData: BlackjackGameData, state: GameState, outcome: 'win' | 'lose' | 'push' | 'blackjack' | 'surrender'): GameResult {
     gameData.gamePhase = 'finished';
     state.status = 'completed';
 
@@ -237,7 +477,7 @@ export class BlackjackProvider extends BaseGameProvider {
 
     switch (outcome) {
       case 'blackjack':
-        multiplier = 2.5;
+        multiplier = 2.5; // 3:2 payout
         isWin = true;
         break;
       case 'win':
@@ -246,6 +486,10 @@ export class BlackjackProvider extends BaseGameProvider {
         break;
       case 'push':
         multiplier = 1;
+        isWin = false;
+        break;
+      case 'surrender':
+        multiplier = 0.5; // Get half bet back
         isWin = false;
         break;
       case 'lose':
@@ -259,10 +503,13 @@ export class BlackjackProvider extends BaseGameProvider {
     const result: BlackjackResult = {
       playerHand: gameData.playerHand,
       dealerHand: gameData.dealerHand,
+      splitHand: gameData.splitHand,
       playerTotal: gameData.playerTotal,
       dealerTotal: gameData.dealerTotal,
+      splitTotal: gameData.splitTotal,
       outcome,
-      isWin
+      isWin,
+      actionHistory: gameData.actionHistory
     };
 
     state.history.push(result);
@@ -273,6 +520,119 @@ export class BlackjackProvider extends BaseGameProvider {
       winAmount,
       gameData: result,
       outcome: { outcome, playerTotal: gameData.playerTotal, dealerTotal: gameData.dealerTotal }
+    };
+  }
+  
+  private finishSplitGame(gameData: BlackjackGameData, state: GameState): GameResult {
+    gameData.gamePhase = 'finished';
+    state.status = 'completed';
+
+    let mainOutcome: 'win' | 'lose' | 'push' | 'blackjack';
+    let splitOutcome: 'win' | 'lose' | 'push' | 'blackjack';
+    
+    // Determine main hand outcome
+    if (gameData.playerTotal > 21) {
+      mainOutcome = 'lose';
+    } else if (gameData.dealerTotal > 21) {
+      mainOutcome = 'win';
+    } else if (gameData.playerTotal > gameData.dealerTotal) {
+      mainOutcome = 'win';
+    } else if (gameData.playerTotal < gameData.dealerTotal) {
+      mainOutcome = 'lose';
+    } else {
+      mainOutcome = 'push';
+    }
+    
+    // Determine split hand outcome
+    if (gameData.splitTotal! > 21) {
+      splitOutcome = 'lose';
+    } else if (gameData.dealerTotal > 21) {
+      splitOutcome = 'win';
+    } else if (gameData.splitTotal! > gameData.dealerTotal) {
+      splitOutcome = 'win';
+    } else if (gameData.splitTotal! < gameData.dealerTotal) {
+      splitOutcome = 'lose';
+    } else {
+      splitOutcome = 'push';
+    }
+    
+    // Check for blackjacks
+    if (this.isBlackjack(gameData.playerHand)) {
+      mainOutcome = 'blackjack';
+    }
+    if (this.isBlackjack(gameData.splitHand!)) {
+      splitOutcome = 'blackjack';
+    }
+
+    const mainMultiplier = this.getMultiplierForOutcome(mainOutcome);
+    const splitMultiplier = this.getMultiplierForOutcome(splitOutcome);
+    
+    const mainWinAmount = this.calculateWinnings(gameData.betAmount, mainMultiplier);
+    const splitWinAmount = this.calculateWinnings(gameData.betAmount, splitMultiplier);
+    
+    const totalWinAmount = mainWinAmount + splitWinAmount;
+    const isWin = mainOutcome === 'win' || mainOutcome === 'blackjack';
+    const isSplitWin = splitOutcome === 'win' || splitOutcome === 'blackjack';
+
+    const result: BlackjackResult = {
+      playerHand: gameData.playerHand,
+      dealerHand: gameData.dealerHand,
+      splitHand: gameData.splitHand,
+      playerTotal: gameData.playerTotal,
+      dealerTotal: gameData.dealerTotal,
+      splitTotal: gameData.splitTotal,
+      outcome: mainOutcome,
+      splitOutcome,
+      isWin,
+      isSplitWin,
+      actionHistory: gameData.actionHistory
+    };
+
+    state.history.push(result);
+
+    return {
+      isWin: isWin || isSplitWin,
+      multiplier: (mainMultiplier + splitMultiplier) / 2, // Average for display
+      winAmount: totalWinAmount,
+      gameData: result,
+      outcome: { 
+        mainOutcome, 
+        splitOutcome, 
+        playerTotal: gameData.playerTotal, 
+        splitTotal: gameData.splitTotal, 
+        dealerTotal: gameData.dealerTotal 
+      }
+    };
+  }
+  
+  private getMultiplierForOutcome(outcome: 'win' | 'lose' | 'push' | 'blackjack'): number {
+    switch (outcome) {
+      case 'blackjack':
+        return 2.5;
+      case 'win':
+        return 2;
+      case 'push':
+        return 1;
+      case 'lose':
+        return 0;
+    }
+  }
+  
+  private getGameDataForResponse(gameData: BlackjackGameData) {
+    return {
+      playerHand: gameData.playerHand,
+      dealerHand: gameData.dealerHand,
+      splitHand: gameData.splitHand,
+      playerTotal: gameData.playerTotal,
+      dealerTotal: gameData.dealerTotal,
+      splitTotal: gameData.splitTotal,
+      gamePhase: gameData.gamePhase,
+      canDoubleDown: gameData.canDoubleDown,
+      canSplit: gameData.canSplit,
+      canSurrender: gameData.canSurrender,
+      isSplit: gameData.isSplit,
+      currentHand: gameData.currentHand,
+      actionHistory: gameData.actionHistory
     };
   }
 }

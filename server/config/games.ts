@@ -18,6 +18,12 @@ export const GAME_CONFIGS: Record<GameType, GameConfig> = {
     maxBet: 50,
     baseMultiplier: 1,
     houseEdge: 0.04
+  },
+  shipcaptaincrew: {
+    minBet: 0.01,
+    maxBet: 50,
+    baseMultiplier: 2,
+    houseEdge: 0.02
   }
 };
 

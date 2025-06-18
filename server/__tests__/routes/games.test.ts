@@ -72,7 +72,9 @@ describe("Games API Routes", () => {
         expect(game.config).toBeDefined();
         expect(game.config.minBet).toBeDefined();
         expect(game.config.maxBet).toBeDefined();
-        expect(["blackjack", "dice", "slots"]).toContain(game.gameType);
+        expect(["blackjack", "dice", "slots", "shipcaptaincrew"]).toContain(
+          game.gameType
+        );
       });
     });
 

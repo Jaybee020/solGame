@@ -36,24 +36,20 @@ const gameRouter = express.Router();
  *                       config:
  *                         type: object
  */
-gameRouter.get(
-  "/supported",
-  authenticatetoken,
-  async (req: Req, res: Response): Promise<void> => {
-    try {
-      const supportedGames = await GameEngine.getSupportedGames();
-      res.status(200).json({
-        success: true,
-        data: supportedGames,
-      });
-    } catch (error) {
-      res.status(400).json({
-        success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
+gameRouter.get("/supported", async (req: Req, res: Response): Promise<void> => {
+  try {
+    const supportedGames = await GameEngine.getSupportedGames();
+    res.status(200).json({
+      success: true,
+      data: supportedGames,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
   }
-);
+});
 
 /**
  * @openapi
@@ -100,7 +96,9 @@ gameRouter.post(
       const { gameType, betAmount, clientSeed, deviceFingerprint } = req.body;
 
       const schema = Joi.object({
-        gameType: Joi.string().valid("blackjack", "dice", "slots").required(),
+        gameType: Joi.string()
+          .valid("blackjack", "dice", "slots", "shipcaptaincrew")
+          .required(),
         betAmount: Joi.number().positive().required(),
         clientSeed: Joi.string().optional(),
         deviceFingerprint: Joi.string().optional(),
@@ -353,7 +351,9 @@ gameRouter.get(
       const { gameType, limit } = req.query;
 
       const schema = Joi.object({
-        gameType: Joi.string().valid("blackjack", "dice", "slots").optional(),
+        gameType: Joi.string()
+          .valid("blackjack", "dice", "slots", "shipcaptaincrew")
+          .optional(),
         limit: Joi.number().integer().min(1).max(100).optional(),
       });
 

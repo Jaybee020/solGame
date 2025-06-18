@@ -12,6 +12,7 @@ import {
 } from "../services/authService";
 import bs58 from "bs58";
 import "./Header.css";
+import gameApi from "../services/gameApi";
 
 const Header: React.FC = () => {
   const { publicKey, signMessage, connected, disconnect } = useWallet();
@@ -49,6 +50,7 @@ const Header: React.FC = () => {
 
       if (response.success) {
         setAuthToken(`${SERVER_API_KEY}:${response.authToken}`);
+        gameApi.setAuthToken(`${SERVER_API_KEY}:${response.authToken}`);
         console.log("Authentication successful:", response.message);
       } else {
         setError("Authentication failed");

@@ -5,7 +5,7 @@ import {
   createServerSeedHash,
 } from "../utils/secureRandomness";
 
-export type GameType = "slots" | "dice" | "blackjack";
+export type GameType = "slots" | "dice" | "blackjack" | "shipcaptaincrew";
 export type GameStatus =
   | "created"
   | "in_progress"
@@ -69,7 +69,7 @@ const GameSessionSchema: Schema = new Schema(
     gameType: {
       type: String,
       required: true,
-      enum: ["slots", "dice", "blackjack", "roulette"],
+      enum: ["slots", "dice", "blackjack", "shipcaptaincrew"],
       index: true,
     },
     sessionId: {

@@ -1,19 +1,32 @@
 import { BaseGameProvider } from './BaseGameProvider';
 import { GameType, GameConfig, GameState, GameResult, GameMove } from '../types/game';
 
+type CryptoTheme = 'BTC' | 'ETH' | 'SOL';
+
+interface SlotSymbol {
+  id: string;
+  name: string;
+  weight: number;
+  multipliers: { [key: number]: number };
+  isCrypto?: boolean;
+  theme?: CryptoTheme;
+}
+
 interface SlotsGameData {
   betAmount: number;
   serverSeed: string;
   clientSeed: string;
   nonce: number;
   paylines: number;
+  theme?: CryptoTheme;
 }
 
 interface SlotsResult {
-  reels: number[][];
-  paylines: Array<{line: number[], multiplier: number}>;
+  reels: string[][];
+  paylines: Array<{line: string[], multiplier: number, symbolCount: number}>;
   totalMultiplier: number;
   isWin: boolean;
+  theme?: CryptoTheme;
 }
 
 export class SlotsProvider extends BaseGameProvider {
@@ -22,31 +35,68 @@ export class SlotsProvider extends BaseGameProvider {
     minBet: 0.01,
     maxBet: 50,
     baseMultiplier: 1,
-    houseEdge: 0.04
+    houseEdge: 0.03 // Updated for 97% RTP
   };
 
-  private readonly SYMBOLS = [0, 1, 2, 3, 4, 5, 6, 7];
   private readonly REEL_SIZE = 3;
   private readonly NUM_REELS = 5;
   
-  private readonly PAYOUTS = new Map([
-    [7, [0, 0, 100, 500, 2000]],
-    [6, [0, 0, 50, 200, 1000]],
-    [5, [0, 0, 25, 100, 500]],
-    [4, [0, 0, 15, 75, 300]],
-    [3, [0, 0, 10, 50, 200]],
-    [2, [0, 5, 25, 100]],
-    [1, [0, 3, 15, 75]],
-    [0, [0, 2, 10, 50]]
-  ]);
+  private readonly SYMBOLS: SlotSymbol[] = [
+    // Fruit symbols (common) - any fruit combo gives 1.5x
+    { id: 'cherry', name: 'Cherry', weight: 150, multipliers: { 3: 1.5, 4: 3, 5: 6 } },
+    { id: 'lemon', name: 'Lemon', weight: 150, multipliers: { 3: 1.5, 4: 3, 5: 6 } },
+    { id: 'orange', name: 'Orange', weight: 150, multipliers: { 3: 1.5, 4: 3, 5: 6 } },
+    { id: 'plum', name: 'Plum', weight: 150, multipliers: { 3: 1.5, 4: 3, 5: 6 } },
+    
+    // Mid-tier symbols
+    { id: 'bell', name: 'Bell', weight: 100, multipliers: { 3: 2, 4: 5, 5: 10 } },
+    { id: 'bar', name: 'Bar', weight: 80, multipliers: { 3: 3, 4: 8, 5: 15 } },
+    { id: 'seven', name: 'Seven', weight: 60, multipliers: { 3: 5, 4: 12, 5: 20 } },
+    
+    // Crypto symbols (rare)
+    { id: 'btc', name: 'Bitcoin', weight: 10, multipliers: { 3: 25, 4: 50, 5: 100 }, isCrypto: true, theme: 'BTC' },
+    { id: 'eth', name: 'Ethereum', weight: 15, multipliers: { 3: 20, 4: 40, 5: 80 }, isCrypto: true, theme: 'ETH' },
+    { id: 'sol', name: 'Solana', weight: 20, multipliers: { 3: 15, 4: 30, 5: 60 }, isCrypto: true, theme: 'SOL' }
+  ];
 
-  initializeGame(betAmount: number, serverSeed: string, clientSeed: string = '', nonce: number = 0): GameState {
+  private getSymbolsForTheme(theme?: CryptoTheme): SlotSymbol[] {
+    if (!theme) return this.SYMBOLS;
+    
+    return this.SYMBOLS.map(symbol => {
+      if (symbol.isCrypto && symbol.theme !== theme) {
+        // Reduce weight of other crypto symbols
+        return { ...symbol, weight: Math.floor(symbol.weight * 0.3) };
+      }
+      if (symbol.isCrypto && symbol.theme === theme) {
+        // Increase weight of themed crypto symbol
+        return { ...symbol, weight: Math.floor(symbol.weight * 2) };
+      }
+      return symbol;
+    });
+  }
+
+  private createWeightedPool(symbols: SlotSymbol[]): string[] {
+    const pool: string[] = [];
+    for (const symbol of symbols) {
+      for (let i = 0; i < symbol.weight; i++) {
+        pool.push(symbol.id);
+      }
+    }
+    return pool;
+  }
+
+  private getSymbolById(id: string): SlotSymbol | undefined {
+    return this.SYMBOLS.find(symbol => symbol.id === id);
+  }
+
+  initializeGame(betAmount: number, serverSeed: string, clientSeed: string = '', nonce: number = 0, theme?: CryptoTheme): GameState {
     const gameData: SlotsGameData = {
       betAmount,
       serverSeed,
       clientSeed,
       nonce,
-      paylines: 25
+      paylines: 25,
+      theme
     };
 
     return {
@@ -60,6 +110,9 @@ export class SlotsProvider extends BaseGameProvider {
   async playGame(state: GameState, move?: GameMove): Promise<GameResult> {
     const gameData = state.currentData as SlotsGameData;
     
+    const symbols = this.getSymbolsForTheme(gameData.theme);
+    const weightedPool = this.createWeightedPool(symbols);
+    
     const randoms = this.generateSecureRandoms(
       gameData.serverSeed, 
       gameData.clientSeed, 
@@ -67,14 +120,14 @@ export class SlotsProvider extends BaseGameProvider {
       this.NUM_REELS * this.REEL_SIZE
     );
 
-    const reels: number[][] = [];
+    const reels: string[][] = [];
     let randomIndex = 0;
 
     for (let i = 0; i < this.NUM_REELS; i++) {
-      const reel: number[] = [];
+      const reel: string[] = [];
       for (let j = 0; j < this.REEL_SIZE; j++) {
-        const symbolIndex = Math.floor(randoms[randomIndex] * this.SYMBOLS.length);
-        reel.push(this.SYMBOLS[symbolIndex]);
+        const poolIndex = Math.floor(randoms[randomIndex] * weightedPool.length);
+        reel.push(weightedPool[poolIndex]);
         randomIndex++;
       }
       reels.push(reel);
@@ -90,7 +143,8 @@ export class SlotsProvider extends BaseGameProvider {
       reels,
       paylines,
       totalMultiplier,
-      isWin
+      isWin,
+      theme: gameData.theme
     };
 
     state.status = 'completed';
@@ -101,30 +155,52 @@ export class SlotsProvider extends BaseGameProvider {
       multiplier: totalMultiplier,
       winAmount,
       gameData: result,
-      outcome: { reels, totalMultiplier, isWin }
+      outcome: { reels, totalMultiplier, isWin, theme: gameData.theme }
     };
   }
 
-  private calculatePaylines(reels: number[][]): Array<{line: number[], multiplier: number}> {
-    const paylines: Array<{line: number[], multiplier: number}> = [];
+  private calculatePaylines(reels: string[][]): Array<{line: string[], multiplier: number, symbolCount: number}> {
+    const paylines: Array<{line: string[], multiplier: number, symbolCount: number}> = [];
     
+    // Check horizontal paylines
     for (let row = 0; row < this.REEL_SIZE; row++) {
-      const line: number[] = [];
+      const line: string[] = [];
       for (let reel = 0; reel < this.NUM_REELS; reel++) {
         line.push(reels[reel][row]);
       }
       
-      const multiplier = this.calculateLineMultiplier(line);
-      if (multiplier > 0) {
-        paylines.push({ line, multiplier });
+      const result = this.calculateLineMultiplier(line);
+      if (result.multiplier > 0) {
+        paylines.push({ line, multiplier: result.multiplier, symbolCount: result.count });
+      }
+    }
+
+    // Check diagonal paylines (top-left to bottom-right and top-right to bottom-left)
+    if (this.REEL_SIZE >= 3) {
+      const diagonalLine1: string[] = [];
+      const diagonalLine2: string[] = [];
+      
+      for (let i = 0; i < Math.min(this.NUM_REELS, this.REEL_SIZE); i++) {
+        diagonalLine1.push(reels[i][i]);
+        diagonalLine2.push(reels[i][this.REEL_SIZE - 1 - i]);
+      }
+      
+      const diagonal1Result = this.calculateLineMultiplier(diagonalLine1);
+      if (diagonal1Result.multiplier > 0) {
+        paylines.push({ line: diagonalLine1, multiplier: diagonal1Result.multiplier, symbolCount: diagonal1Result.count });
+      }
+      
+      const diagonal2Result = this.calculateLineMultiplier(diagonalLine2);
+      if (diagonal2Result.multiplier > 0) {
+        paylines.push({ line: diagonalLine2, multiplier: diagonal2Result.multiplier, symbolCount: diagonal2Result.count });
       }
     }
 
     return paylines;
   }
 
-  private calculateLineMultiplier(line: number[]): number {
-    if (line.length < 3) return 0;
+  private calculateLineMultiplier(line: string[]): { multiplier: number, count: number } {
+    if (line.length < 3) return { multiplier: 0, count: 0 };
 
     const firstSymbol = line[0];
     let consecutiveCount = 1;
@@ -137,13 +213,48 @@ export class SlotsProvider extends BaseGameProvider {
       }
     }
 
-    if (consecutiveCount >= 3) {
-      const payoutTable = this.PAYOUTS.get(firstSymbol);
-      if (payoutTable && payoutTable[consecutiveCount - 1]) {
-        return payoutTable[consecutiveCount - 1];
+    // Check for any fruit combination (different fruits)
+    if (consecutiveCount < 3) {
+      const fruitSymbols = ['cherry', 'lemon', 'orange', 'plum'];
+      const fruitCount = line.filter(symbol => fruitSymbols.includes(symbol)).length;
+      
+      if (fruitCount >= 3) {
+        return { multiplier: 1.5, count: fruitCount };
       }
     }
 
-    return 0;
+    if (consecutiveCount >= 3) {
+      const symbol = this.getSymbolById(firstSymbol);
+      if (symbol && symbol.multipliers[consecutiveCount]) {
+        return { multiplier: symbol.multipliers[consecutiveCount], count: consecutiveCount };
+      }
+    }
+
+    return { multiplier: 0, count: 0 };
+  }
+
+  // Public method to support themed games
+  initializeThemedGame(betAmount: number, serverSeed: string, theme: CryptoTheme, clientSeed: string = '', nonce: number = 0): GameState {
+    return this.initializeGame(betAmount, serverSeed, clientSeed, nonce, theme);
+  }
+
+  // Method to get available themes
+  getAvailableThemes(): CryptoTheme[] {
+    return ['BTC', 'ETH', 'SOL'];
+  }
+
+  // Method to get symbol information for a theme
+  getThemeSymbols(theme?: CryptoTheme): SlotSymbol[] {
+    return this.getSymbolsForTheme(theme);
+  }
+
+  // Calculate theoretical RTP
+  calculateTheoreticalRTP(): number {
+    return (1 - this.config.houseEdge) * 100;
+  }
+
+  // Get all available symbols
+  getAllSymbols(): SlotSymbol[] {
+    return this.SYMBOLS;
   }
 }

@@ -2,6 +2,7 @@ import { IGameProvider, GameType } from "../types/game";
 import { BlackjackProvider } from "../providers/BlackjackProvider";
 import { DiceProvider } from "../providers/DiceProvider";
 import { SlotsProvider } from "../providers/SlotsProvider";
+import { ShipCaptainCrewProvider } from "../providers/ShipCaptainCrewProvider";
 
 export class GameFactory {
   private static providers: Map<GameType, IGameProvider> = new Map();
@@ -10,6 +11,7 @@ export class GameFactory {
     GameFactory.registerProvider(new BlackjackProvider());
     GameFactory.registerProvider(new DiceProvider());
     GameFactory.registerProvider(new SlotsProvider());
+    GameFactory.registerProvider(new ShipCaptainCrewProvider());
   }
 
   static registerProvider(provider: IGameProvider): void {
