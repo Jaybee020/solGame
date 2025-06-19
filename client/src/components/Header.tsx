@@ -13,6 +13,7 @@ import {
 import bs58 from "bs58";
 import "./Header.css";
 import gameApi from "../services/gameApi";
+import { useTokenBalance } from "../hooks/useTokenBalance";
 
 const Header: React.FC = () => {
   const { publicKey, signMessage, connected, disconnect } = useWallet();
@@ -26,6 +27,7 @@ const Header: React.FC = () => {
   } = useAuth();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { formattedBalance, isLoading: isBalanceLoading } = useTokenBalance();
 
   const handleAuthenticate = useCallback(async () => {
     if (!publicKey || !signMessage) {
@@ -124,6 +126,9 @@ const Header: React.FC = () => {
               <div className="wallet-info">
                 <span className="wallet-address">
                   {walletAddress?.slice(0, 4)}...{walletAddress?.slice(-4)}
+                </span>
+                <span className="token-balance">
+                  {isBalanceLoading ? "Loading..." : formattedBalance}
                 </span>
                 {isAuthenticated && (
                   <span className="auth-status">✓ Authenticated</span>

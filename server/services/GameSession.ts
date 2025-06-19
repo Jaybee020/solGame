@@ -275,13 +275,11 @@ class GameSessionService {
 
   async getPendingPayouts(): Promise<IGameSession[]> {
     try {
-      return await this.model
-        .find({
-          status: "completed",
-          payoutProcessed: false,
-          "result.winAmount": { $gt: 0 },
-        })
-        .populate("userId");
+      return await this.model.find({
+        status: "completed",
+        payoutProcessed: false,
+        "result.winAmount": { $gt: 0 },
+      });
     } catch (error) {
       throw new Error(`Failed to get pending payouts: ${error}`);
     }

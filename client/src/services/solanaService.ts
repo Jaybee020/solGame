@@ -86,7 +86,12 @@ export class SolanaService {
 
       // Check if recipient token account exists
       try {
-        await getAccount(this.connection, recipientTokenAccount);
+        await getAccount(
+          this.connection,
+          recipientTokenAccount,
+          undefined,
+          TOKEN_2022_PROGRAM_ID
+        );
       } catch (error) {
         if (error instanceof TokenAccountNotFoundError) {
           // Add instruction to create recipient's associated token account
@@ -196,8 +201,18 @@ export class SolanaService {
       const wallet = new PublicKey(walletAddress);
       const tokenMint = new PublicKey(tokenMintAddress);
 
-      const tokenAccount = await getAssociatedTokenAddress(tokenMint, wallet);
-      const account = await getAccount(this.connection, tokenAccount);
+      const tokenAccount = await getAssociatedTokenAddress(
+        tokenMint,
+        wallet,
+        undefined,
+        TOKEN_2022_PROGRAM_ID
+      );
+      const account = await getAccount(
+        this.connection,
+        tokenAccount,
+        undefined,
+        TOKEN_2022_PROGRAM_ID
+      );
 
       return Number(account.amount);
     } catch (error) {
