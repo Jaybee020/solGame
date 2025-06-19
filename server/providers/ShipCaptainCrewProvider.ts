@@ -1,5 +1,11 @@
-import { BaseGameProvider } from './BaseGameProvider';
-import { GameType, GameConfig, GameState, GameResult, GameMove } from '../types/game';
+import { BaseGameProvider } from "./BaseGameProvider";
+import {
+  GameType,
+  GameConfig,
+  GameState,
+  GameResult,
+  GameMove,
+} from "../types/game";
 
 interface ShipCaptainCrewGameData {
   betAmount: number;
@@ -12,7 +18,7 @@ interface ShipCaptainCrewGameData {
   hasCaptain: boolean;
   hasCrew: boolean;
   cargoSum: number;
-  gamePhase: 'rolling' | 'finished';
+  gamePhase: "rolling" | "finished";
   maxRolls: number;
 }
 
@@ -22,26 +28,41 @@ interface ShipCaptainCrewResult {
   hasCaptain: boolean;
   hasCrew: boolean;
   cargoSum: number;
-  outcome: 'win' | 'lose';
+  outcome: "win" | "lose";
   isWin: boolean;
   multiplier: number;
 }
 
 export class ShipCaptainCrewProvider extends BaseGameProvider {
-  gameType: GameType = 'shipcaptaincrew' as GameType;
+  gameType: GameType = "shipcaptaincrew" as GameType;
   config: GameConfig = {
-    minBet: 0.01,
+    minBet: 1,
     maxBet: 100,
     baseMultiplier: 1,
-    houseEdge: 0.05
+    houseEdge: 0.05,
   };
 
-  private rollDice(serverSeed: string, clientSeed: string, nonce: number, count: number = 5): number[] {
-    const randoms = this.generateSecureRandoms(serverSeed, clientSeed, nonce, count);
-    return randoms.map(random => Math.floor(random * 6) + 1);
+  private rollDice(
+    serverSeed: string,
+    clientSeed: string,
+    nonce: number,
+    count: number = 5
+  ): number[] {
+    const randoms = this.generateSecureRandoms(
+      serverSeed,
+      clientSeed,
+      nonce,
+      count
+    );
+    return randoms.map((random) => Math.floor(random * 6) + 1);
   }
 
-  private calculateMultiplier(cargoSum: number, hasShip: boolean, hasCaptain: boolean, hasCrew: boolean): number {
+  private calculateMultiplier(
+    cargoSum: number,
+    hasShip: boolean,
+    hasCaptain: boolean,
+    hasCrew: boolean
+  ): number {
     if (!hasShip || !hasCaptain || !hasCrew) {
       return 0;
     }
@@ -80,11 +101,19 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
     }
 
     if (gameData.hasShip && gameData.hasCaptain && gameData.hasCrew) {
-      gameData.cargoSum = Math.max(gameData.cargoSum, availableDice.reduce((sum, die) => sum + die, 0));
+      gameData.cargoSum = Math.max(
+        gameData.cargoSum,
+        availableDice.reduce((sum, die) => sum + die, 0)
+      );
     }
   }
 
-  initializeGame(betAmount: number, serverSeed: string, clientSeed: string = '', nonce: number = 0): GameState {
+  initializeGame(
+    betAmount: number,
+    serverSeed: string,
+    clientSeed: string = "",
+    nonce: number = 0
+  ): GameState {
     const gameData: ShipCaptainCrewGameData = {
       betAmount,
       serverSeed,
@@ -96,23 +125,23 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
       hasCaptain: false,
       hasCrew: false,
       cargoSum: 0,
-      gamePhase: 'rolling',
-      maxRolls: 3
+      gamePhase: "rolling",
+      maxRolls: 3,
     };
 
     return {
       gameType: this.gameType,
-      status: 'in_progress',
+      status: "in_progress",
       currentData: gameData,
-      history: []
+      history: [],
     };
   }
 
   async playGame(state: GameState, move?: GameMove): Promise<GameResult> {
     const gameData = state.currentData as ShipCaptainCrewGameData;
 
-    if (gameData.gamePhase === 'finished') {
-      throw new Error('Game already finished');
+    if (gameData.gamePhase === "finished") {
+      throw new Error("Game already finished");
     }
 
     if (!move || !move.action) {
@@ -120,24 +149,40 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
     }
 
     switch (move.action) {
-      case 'roll':
+      case "roll":
         return this.handleRoll(gameData, state);
-      case 'stop':
+      case "stop":
         return this.handleStop(gameData, state);
       default:
         return this.autoPlay(gameData, state);
     }
   }
 
-  private async autoPlay(gameData: ShipCaptainCrewGameData, state: GameState): Promise<GameResult> {
-    while (gameData.rollNumber < gameData.maxRolls && gameData.gamePhase === 'rolling') {
-      const dice = this.rollDice(gameData.serverSeed, gameData.clientSeed, gameData.nonce + gameData.rollNumber, 5);
+  private async autoPlay(
+    gameData: ShipCaptainCrewGameData,
+    state: GameState
+  ): Promise<GameResult> {
+    while (
+      gameData.rollNumber < gameData.maxRolls &&
+      gameData.gamePhase === "rolling"
+    ) {
+      const dice = this.rollDice(
+        gameData.serverSeed,
+        gameData.clientSeed,
+        gameData.nonce + gameData.rollNumber,
+        5
+      );
       gameData.rolls.push(...dice);
       gameData.rollNumber++;
 
       this.processRoll(dice, gameData);
 
-      if (gameData.hasShip && gameData.hasCaptain && gameData.hasCrew && gameData.cargoSum === 12) {
+      if (
+        gameData.hasShip &&
+        gameData.hasCaptain &&
+        gameData.hasCrew &&
+        gameData.cargoSum === 12
+      ) {
         break;
       }
     }
@@ -145,18 +190,32 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
     return this.finishGame(gameData, state);
   }
 
-  private async handleRoll(gameData: ShipCaptainCrewGameData, state: GameState): Promise<GameResult> {
+  private async handleRoll(
+    gameData: ShipCaptainCrewGameData,
+    state: GameState
+  ): Promise<GameResult> {
     if (gameData.rollNumber >= gameData.maxRolls) {
       return this.finishGame(gameData, state);
     }
 
-    const dice = this.rollDice(gameData.serverSeed, gameData.clientSeed, gameData.nonce + gameData.rollNumber, 5);
+    const dice = this.rollDice(
+      gameData.serverSeed,
+      gameData.clientSeed,
+      gameData.nonce + gameData.rollNumber,
+      5
+    );
     gameData.rolls.push(...dice);
     gameData.rollNumber++;
 
     this.processRoll(dice, gameData);
 
-    if (gameData.rollNumber >= gameData.maxRolls || (gameData.hasShip && gameData.hasCaptain && gameData.hasCrew && gameData.cargoSum === 12)) {
+    if (
+      gameData.rollNumber >= gameData.maxRolls ||
+      (gameData.hasShip &&
+        gameData.hasCaptain &&
+        gameData.hasCrew &&
+        gameData.cargoSum === 12)
+    ) {
       return this.finishGame(gameData, state);
     }
 
@@ -172,21 +231,36 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
         hasCaptain: gameData.hasCaptain,
         hasCrew: gameData.hasCrew,
         cargoSum: gameData.cargoSum,
-        gamePhase: gameData.gamePhase
+        gamePhase: gameData.gamePhase,
       },
-      outcome: { action: 'roll', rollNumber: gameData.rollNumber, status: 'continue' }
+      outcome: {
+        action: "roll",
+        rollNumber: gameData.rollNumber,
+        status: "continue",
+      },
     };
   }
 
-  private async handleStop(gameData: ShipCaptainCrewGameData, state: GameState): Promise<GameResult> {
+  private async handleStop(
+    gameData: ShipCaptainCrewGameData,
+    state: GameState
+  ): Promise<GameResult> {
     return this.finishGame(gameData, state);
   }
 
-  private finishGame(gameData: ShipCaptainCrewGameData, state: GameState): GameResult {
-    gameData.gamePhase = 'finished';
-    state.status = 'completed';
+  private finishGame(
+    gameData: ShipCaptainCrewGameData,
+    state: GameState
+  ): GameResult {
+    gameData.gamePhase = "finished";
+    state.status = "completed";
 
-    const multiplier = this.calculateMultiplier(gameData.cargoSum, gameData.hasShip, gameData.hasCaptain, gameData.hasCrew);
+    const multiplier = this.calculateMultiplier(
+      gameData.cargoSum,
+      gameData.hasShip,
+      gameData.hasCaptain,
+      gameData.hasCrew
+    );
     const isWin = multiplier > 0;
     const winAmount = this.calculateWinnings(gameData.betAmount, multiplier);
 
@@ -196,9 +270,9 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
       hasCaptain: gameData.hasCaptain,
       hasCrew: gameData.hasCrew,
       cargoSum: gameData.cargoSum,
-      outcome: isWin ? 'win' : 'lose',
+      outcome: isWin ? "win" : "lose",
       isWin,
-      multiplier
+      multiplier,
     };
 
     state.history.push(result);
@@ -208,14 +282,14 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
       multiplier,
       winAmount,
       gameData: result,
-      outcome: { 
+      outcome: {
         hasShip: gameData.hasShip,
         hasCaptain: gameData.hasCaptain,
         hasCrew: gameData.hasCrew,
         cargoSum: gameData.cargoSum,
         multiplier,
-        totalRolls: gameData.rollNumber
-      }
+        totalRolls: gameData.rollNumber,
+      },
     };
   }
 }

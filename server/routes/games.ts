@@ -93,7 +93,13 @@ gameRouter.post(
   authenticatetoken,
   async (req: Req, res: Response): Promise<void> => {
     try {
-      const { gameType, betAmount, clientSeed, deviceFingerprint } = req.body;
+      const {
+        gameType,
+        betAmount,
+        clientSeed,
+        deviceFingerprint,
+        depositTxHash,
+      } = req.body;
 
       const schema = Joi.object({
         gameType: Joi.string()
@@ -102,6 +108,7 @@ gameRouter.post(
         betAmount: Joi.number().positive().required(),
         clientSeed: Joi.string().optional(),
         deviceFingerprint: Joi.string().optional(),
+        depositTxHash: Joi.string().required(),
       });
 
       const { error } = schema.validate({
@@ -109,6 +116,7 @@ gameRouter.post(
         betAmount,
         clientSeed,
         deviceFingerprint,
+        depositTxHash,
       });
       if (error) {
         res.status(422).json({
@@ -144,6 +152,7 @@ gameRouter.post(
       const gameResponse = await GameEngine.createGame(
         userId,
         createGameRequest,
+        depositTxHash,
         clientInfo
       );
 

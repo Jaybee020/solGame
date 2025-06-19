@@ -183,6 +183,14 @@ const GameSessionSchema: Schema = new Schema(
       type: Schema.Types.Mixed,
       default: {},
     },
+    depositTxHash: {
+      type: String,
+      required: false,
+    },
+    payoutTxHash: {
+      type: String,
+      required: false,
+    },
     suspiciousActivity: [
       {
         reason: String,

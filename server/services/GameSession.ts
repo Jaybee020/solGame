@@ -164,6 +164,19 @@ class GameSessionService {
     }
   }
 
+  async getWinningGames(): Promise<IGameSession[]> {
+    try {
+      const games = await GameSession.find({
+        status: "completed",
+      });
+      games.filter((game) => (game.result?.winAmount || 0) > 0);
+
+      return games;
+    } catch (error) {
+      throw new Error(`Failed to get winning games: ${error}`);
+    }
+  }
+
   async cancelSession(
     id: string,
     reason?: string,
@@ -342,6 +355,21 @@ class GameSessionService {
       );
     } catch (error) {
       throw new Error(`Failed to get session stats: ${error}`);
+    }
+  }
+
+  async getGameSessionByDepositTxHash(
+    depositTxHash: string
+  ): Promise<IGameSession | null> {
+    try {
+      const session = await this.model.findOne({
+        depositTxHash,
+      });
+      return session;
+    } catch (error) {
+      throw new Error(
+        `Failed to get game session by deposit tx hash: ${error}`
+      );
     }
   }
 

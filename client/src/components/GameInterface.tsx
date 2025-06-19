@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useWallet } from '@solana/wallet-adapter-react';
 import { useGame } from '../hooks/useGame';
 import { useSupportedGames } from '../hooks/useSupportedGames';
 import BlackjackGame from './games/BlackjackGame';
 import DiceGame from './games/DiceGame';
 import SlotsGame from './games/SlotsGame';
 import ShipCaptainCrewGame from './games/ShipCaptainCrewGame';
-import { STAKING_TOKEN, PAYOUT_TOKEN } from '../config/tokens';
+import { STAKING_TOKEN, PAYOUT_TOKEN, MANAGER_WALLET_ADDRESS } from '../config/tokens';
+import { solanaService } from '../services/solanaService';
 
 interface GameInterfaceProps {
   gameType: string;
@@ -14,15 +16,21 @@ interface GameInterfaceProps {
   isWalletConnected: boolean;
 }
 
+type DepositStatus = 'idle' | 'depositing' | 'confirming' | 'confirmed' | 'failed';
+
 const GameInterface: React.FC<GameInterfaceProps> = ({
   gameType,
   onBackToLobby,
   isWalletConnected,
 }) => {
+  const wallet = useWallet();
   const { gameState, createGame, playMove, autoPlay, resetGame } = useGame();
   const { getGameConfig } = useSupportedGames();
   const [betAmount, setBetAmount] = useState(1);
   const [showResult, setShowResult] = useState(false);
+  const [depositStatus, setDepositStatus] = useState<DepositStatus>('idle');
+  const [depositTxHash, setDepositTxHash] = useState<string | null>(null);
+  const [depositError, setDepositError] = useState<string | null>(null);
 
   const gameConfig = getGameConfig(gameType);
 
@@ -32,8 +40,8 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
     }
   }, [gameState.status, gameState.result]);
 
-  const handleStartGame = async () => {
-    if (!isWalletConnected) {
+  const handleDepositAndStartGame = async () => {
+    if (!isWalletConnected || !wallet.publicKey) {
       alert('Please connect your wallet first');
       return;
     }
@@ -48,19 +56,63 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
       return;
     }
 
-    const success = await createGame({
-      gameType,
-      betAmount,
-    });
+    try {
+      setDepositStatus('depositing');
+      setDepositError(null);
 
-    if (!success) {
-      console.error('Failed to create game');
+      // Step 1: Transfer tokens to manager wallet
+      const signature = await solanaService.transferTokens(
+        wallet,
+        STAKING_TOKEN.mint,
+        MANAGER_WALLET_ADDRESS,
+        betAmount,
+        STAKING_TOKEN.decimals
+      );
+
+      if (!signature) {
+        throw new Error('Failed to send deposit transaction');
+      }
+
+      setDepositTxHash(signature);
+      setDepositStatus('confirming');
+
+      // Step 2: Wait for confirmation
+      const confirmed = await solanaService.waitForConfirmation(signature, 30000);
+      
+      if (!confirmed) {
+        throw new Error('Transaction confirmation timeout');
+      }
+
+      setDepositStatus('confirmed');
+
+      // Step 3: Create game with deposit transaction hash
+      const success = await createGame({
+        gameType,
+        betAmount,
+        depositTxHash: signature,
+      });
+
+      if (!success) {
+        throw new Error('Failed to create game after deposit');
+      }
+
+      // Reset deposit status after successful game creation
+      setDepositStatus('idle');
+      setDepositTxHash(null);
+
+    } catch (error: any) {
+      console.error('Deposit and game creation error:', error);
+      setDepositStatus('failed');
+      setDepositError(error.message || 'Unknown error occurred');
     }
   };
 
   const handleNewGame = () => {
     resetGame();
     setShowResult(false);
+    setDepositStatus('idle');
+    setDepositTxHash(null);
+    setDepositError(null);
   };
 
   const renderGameComponent = () => {
@@ -214,11 +266,49 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                 </div>
               </div>
 
+              {/* Deposit Status Display */}
+              {depositStatus !== 'idle' && (
+                <div className="mb-4 p-4 bg-background-tertiary rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-text-secondary">Deposit Status:</span>
+                    <span className={`font-semibold ${
+                      depositStatus === 'confirmed' ? 'text-primary' : 
+                      depositStatus === 'failed' ? 'text-error' : 'text-warning'
+                    }`}>
+                      {depositStatus === 'depositing' && 'Sending Deposit...'}
+                      {depositStatus === 'confirming' && 'Confirming Transaction...'}
+                      {depositStatus === 'confirmed' && 'Deposit Confirmed ✓'}
+                      {depositStatus === 'failed' && 'Deposit Failed ✗'}
+                    </span>
+                  </div>
+                  
+                  {depositTxHash && (
+                    <div className="text-xs">
+                      <span className="text-text-secondary">Transaction: </span>
+                      <a 
+                        href={`https://explorer.solana.com/tx/${depositTxHash}?cluster=devnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        {depositTxHash.slice(0, 8)}...{depositTxHash.slice(-8)}
+                      </a>
+                    </div>
+                  )}
+                  
+                  {depositError && (
+                    <div className="text-error text-sm mt-2">
+                      {depositError}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <button
-                onClick={handleStartGame}
-                disabled={!isWalletConnected || gameState.isLoading}
+                onClick={handleDepositAndStartGame}
+                disabled={!isWalletConnected || gameState.isLoading || depositStatus === 'depositing' || depositStatus === 'confirming'}
                 className={`w-full py-3 font-semibold rounded-lg transition-all duration-200 ${
-                  !isWalletConnected || gameState.isLoading
+                  !isWalletConnected || gameState.isLoading || depositStatus === 'depositing' || depositStatus === 'confirming'
                     ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                     : 'btn-primary hover:shadow-glow'
                 }`}
@@ -228,10 +318,22 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                     <div className="loading-spinner w-5 h-5" />
                     <span>Creating Game...</span>
                   </div>
+                ) : depositStatus === 'depositing' ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="loading-spinner w-5 h-5" />
+                    <span>Sending Deposit...</span>
+                  </div>
+                ) : depositStatus === 'confirming' ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="loading-spinner w-5 h-5" />
+                    <span>Confirming Transaction...</span>
+                  </div>
                 ) : !isWalletConnected ? (
                   'Connect Wallet to Play'
+                ) : depositStatus === 'failed' ? (
+                  'Retry Deposit & Start Game'
                 ) : (
-                  `Start Game - $${betAmount.toFixed(2)}`
+                  `Deposit ${betAmount.toFixed(2)} ${STAKING_TOKEN.symbol} & Start Game`
                 )}
               </button>
             </motion.div>

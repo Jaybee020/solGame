@@ -2,6 +2,7 @@ import { config } from "dotenv";
 import { AnchorProvider } from "@coral-xyz/anchor";
 import NodeWallet from "@coral-xyz/anchor/dist/cjs/nodewallet";
 import { Connection, Keypair } from "@solana/web3.js";
+import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 
 config();
 
@@ -24,24 +25,33 @@ export interface TokenConfig {
   name: string;
   symbol: string;
   decimals: number;
-  mint?: string;
+  mint: string;
 }
 
 export const STAKING_TOKEN: TokenConfig = {
   name: "Cash Token",
   symbol: "CASH",
-  decimals: 6,
-  mint: "11111111111111111111111111111111" // Replace with actual mint address
+  decimals: 9,
+  mint: "A7DRJdbf6zwjY3wwmecUpiGHqvzcWjcLsJWGe52rj7WL", // Replace with actual mint address
 };
 
 export const PAYOUT_TOKEN: TokenConfig = {
-  name: "Cash Token", 
+  name: "Cash Token",
   symbol: "CASH",
-  decimals: 6,
-  mint: "11111111111111111111111111111111" // Replace with actual mint address
+  decimals: 9,
+  mint: "A7DRJdbf6zwjY3wwmecUpiGHqvzcWjcLsJWGe52rj7WL", // Replace with actual mint address
 };
 
 export const SOL_MINT = "So11111111111111111111111111111111111111112";
 export const SOL_DECIMALS = 9;
 export const LOGIN_SECRET = process.env.LOGIN_SECRET || "login-secret";
 export const SERVER_API_KEY = process.env.SERVER_API_KEY || "server-key";
+
+export const MANAGER_WALLET_PRIVATE_KEY =
+  process.env.MANAGER_WALLET_PRIVATE_KEY || "manager-wallet-private-key";
+
+export const MANAGER_KEYPAIR = Keypair.fromSecretKey(
+  new Uint8Array(bs58.decode(MANAGER_WALLET_PRIVATE_KEY))
+);
+
+export const MANAGER_WALLET_ADDRESS = MANAGER_KEYPAIR.publicKey.toString();

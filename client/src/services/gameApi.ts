@@ -21,6 +21,7 @@ export interface CreateGameRequest {
   betAmount: number;
   clientSeed?: string;
   deviceFingerprint?: string;
+  depositTxHash?: string;
 }
 
 export interface GameMove {

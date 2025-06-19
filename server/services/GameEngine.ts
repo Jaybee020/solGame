@@ -10,6 +10,12 @@ import {
 } from "../types/game";
 import { IGameSession } from "../models/GameSession";
 import { secureRandomString } from "../utils/secureRandomness";
+import { SolanaService } from "./SolanaService";
+import {
+  MANAGER_WALLET_ADDRESS,
+  SOLANA_RPC_URL,
+  STAKING_TOKEN,
+} from "../config/constants";
 
 export class GameEngine {
   private sessionService = GameSessionService;
@@ -17,11 +23,36 @@ export class GameEngine {
   async createGame(
     userId: string,
     request: CreateGameRequest,
+    depositTxHash: string,
     clientInfo?: any
   ): Promise<GameResponse> {
     try {
       if (!GameFactory.validateGameType(request.gameType)) {
         throw new Error(`Invalid game type: ${request.gameType}`);
+      }
+
+      if (!depositTxHash) {
+        throw new Error("Deposit transaction hash is required");
+      }
+
+      const solanaService = new SolanaService(SOLANA_RPC_URL);
+
+      const existingSession =
+        await this.sessionService.getGameSessionByDepositTxHash(depositTxHash);
+
+      if (existingSession) {
+        throw new Error("Deposit transaction already used");
+      }
+
+      const depositVerified = await solanaService.verifyTokenTransfer(
+        depositTxHash,
+        STAKING_TOKEN.mint,
+        MANAGER_WALLET_ADDRESS,
+        request.betAmount
+      );
+
+      if (!depositVerified) {
+        throw new Error("Deposit transaction not verified");
       }
 
       const provider = GameFactory.getProvider(request.gameType);

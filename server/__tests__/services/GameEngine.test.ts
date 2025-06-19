@@ -38,6 +38,7 @@ describe("GameEngine", () => {
       const response = await GameEngine.createGame(
         testUser.id,
         request,
+        "test_deposit_hash",
         clientInfo
       );
 
@@ -59,7 +60,7 @@ describe("GameEngine", () => {
           betAmount: 1.0,
         });
 
-        const response = await GameEngine.createGame(testUser.id, request);
+        const response = await GameEngine.createGame(testUser.id, request, "test_deposit_hash");
 
         expect(response.gameType).toBe(gameType);
         expect(response.sessionId).toBeDefined();
@@ -73,7 +74,7 @@ describe("GameEngine", () => {
         betAmount: 1.0,
       };
 
-      await expect(GameEngine.createGame(testUser.id, request)).rejects.toThrow(
+      await expect(GameEngine.createGame(testUser.id, request, "test_deposit_hash")).rejects.toThrow(
         "Invalid game type: invalid_game"
       );
     });
@@ -84,7 +85,7 @@ describe("GameEngine", () => {
         betAmount: 0.0001, // Below minimum
       });
 
-      await expect(GameEngine.createGame(testUser.id, request)).rejects.toThrow(
+      await expect(GameEngine.createGame(testUser.id, request, "test_deposit_hash")).rejects.toThrow(
         "Invalid bet amount"
       );
     });
@@ -95,7 +96,7 @@ describe("GameEngine", () => {
         betAmount: 1000, // Above maximum
       });
 
-      await expect(GameEngine.createGame(testUser.id, request)).rejects.toThrow(
+      await expect(GameEngine.createGame(testUser.id, request, "test_deposit_hash")).rejects.toThrow(
         "Invalid bet amount"
       );
     });
@@ -115,6 +116,7 @@ describe("GameEngine", () => {
       const response = await GameEngine.createGame(
         testUser.id,
         request,
+        "test_deposit_hash",
         clientInfo
       );
 
@@ -133,8 +135,8 @@ describe("GameEngine", () => {
         betAmount: 1.0,
       });
 
-      const response1 = await GameEngine.createGame(testUser.id, request);
-      const response2 = await GameEngine.createGame(testUser.id, request);
+      const response1 = await GameEngine.createGame(testUser.id, request, "test_deposit_hash");
+      const response2 = await GameEngine.createGame(testUser.id, request, "test_deposit_hash");
 
       expect(response1.sessionId).not.toBe(response2.sessionId);
     });
@@ -154,11 +156,13 @@ describe("GameEngine", () => {
 
       const response1 = await GameEngine.createGame(
         testUser.id,
-        requestWithSeed
+        requestWithSeed,
+        "test_deposit_hash"
       );
       const response2 = await GameEngine.createGame(
         testUser.id,
-        requestWithoutSeed
+        requestWithoutSeed,
+        "test_deposit_hash"
       );
 
       const session1 = await GameSession.findOne({
@@ -182,7 +186,7 @@ describe("GameEngine", () => {
         gameType: "dice",
         betAmount: 1.0,
       });
-      const response = await GameEngine.createGame(testUser.id, request);
+      const response = await GameEngine.createGame(testUser.id, request, "test_deposit_hash");
       gameSession = await GameSession.findOne({
         sessionId: response.sessionId,
       });
@@ -208,7 +212,7 @@ describe("GameEngine", () => {
         gameType: "blackjack",
         betAmount: 1.0,
       });
-      const bjResponse = await GameEngine.createGame(testUser.id, bjRequest);
+      const bjResponse = await GameEngine.createGame(testUser.id, bjRequest, "test_deposit_hash");
       const bjSession = await GameSession.findOne({
         sessionId: bjResponse.sessionId,
       });
@@ -307,7 +311,7 @@ describe("GameEngine", () => {
         gameType: "blackjack",
         betAmount: 1.0,
       });
-      const bjResponse = await GameEngine.createGame(testUser.id, bjRequest);
+      const bjResponse = await GameEngine.createGame(testUser.id, bjRequest, "test_deposit_hash");
 
       const move = gameMoveFactory.build({
         action: "hit",
@@ -353,7 +357,7 @@ describe("GameEngine", () => {
         gameType: "dice",
         betAmount: 1.0,
       });
-      const response = await GameEngine.createGame(testUser.id, request);
+      const response = await GameEngine.createGame(testUser.id, request, "test_deposit_hash");
       gameSession = await GameSession.findOne({
         sessionId: response.sessionId,
       });
@@ -413,7 +417,7 @@ describe("GameEngine", () => {
             gameType,
             betAmount: 1.0 + i,
           });
-          const response = await GameEngine.createGame(testUser.id, request);
+          const response = await GameEngine.createGame(testUser.id, request, "test_deposit_hash");
 
           // Complete some games
           if (i % 2 === 0) {
@@ -521,7 +525,7 @@ describe("GameEngine", () => {
         gameType: "dice",
         betAmount: 1.0,
       });
-      const response = await GameEngine.createGame(testUser.id, request);
+      const response = await GameEngine.createGame(testUser.id, request, "test_deposit_hash");
       gameSession = await GameSession.findOne({
         sessionId: response.sessionId,
       });
@@ -591,7 +595,7 @@ describe("GameEngine", () => {
       });
 
       await expect(
-        GameEngine.createGame("invalid_user_id", request)
+        GameEngine.createGame("invalid_user_id", request, "test_deposit_hash")
       ).rejects.toThrow();
     });
 
@@ -604,7 +608,7 @@ describe("GameEngine", () => {
       });
 
       try {
-        await GameEngine.createGame("507f1f77bcf86cd799439011", request); // Valid ObjectId format
+        await GameEngine.createGame("507f1f77bcf86cd799439011", request, "test_deposit_hash"); // Valid ObjectId format
       } catch (error) {
         expect(error).toBeInstanceOf(Error);
         expect((error as Error).message).toContain("Failed to create game");
