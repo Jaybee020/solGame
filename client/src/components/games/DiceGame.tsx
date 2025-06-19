@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { GameState } from "../../hooks/useGame";
+import { PAYOUT_TOKEN } from "../../config/tokens";
 
 interface DiceGameProps {
   gameState: GameState;
@@ -199,7 +200,7 @@ const DiceGame: React.FC<DiceGameProps> = ({
               <div className="flex justify-between items-center">
                 <span className="text-text-secondary">Potential Win:</span>
                 <span className="text-primary font-semibold">
-                  ${(betAmount * calculateMultiplier()).toFixed(2)}
+                  {(betAmount * calculateMultiplier()).toFixed(2)} ${PAYOUT_TOKEN.symbol}
                 </span>
               </div>
             </div>

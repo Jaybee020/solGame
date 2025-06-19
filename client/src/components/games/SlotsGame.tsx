@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { GameState } from '../../hooks/useGame';
+import { PAYOUT_TOKEN } from '../../config/tokens';
 
 interface SlotsGameProps {
   gameState: GameState;
@@ -243,7 +244,7 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
                   </div>
                 </div>
                 <span className="text-primary font-bold">
-                  +${line.payout.toFixed(2)}
+                  +{line.payout.toFixed(2)} ${PAYOUT_TOKEN.symbol}
                 </span>
               </div>
             ))}

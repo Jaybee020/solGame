@@ -35,8 +35,6 @@ const AppContent: React.FC = () => {
   const handleWalletLogin = async () => {
     try {
       if (!publicKey) return;
-
-      await login(publicKey.toString());
     } catch (error) {
       console.error("Auto-login failed:", error);
     }

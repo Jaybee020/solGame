@@ -6,6 +6,7 @@ import BlackjackGame from './games/BlackjackGame';
 import DiceGame from './games/DiceGame';
 import SlotsGame from './games/SlotsGame';
 import ShipCaptainCrewGame from './games/ShipCaptainCrewGame';
+import { STAKING_TOKEN, PAYOUT_TOKEN } from '../config/tokens';
 
 interface GameInterfaceProps {
   gameType: string;
@@ -137,7 +138,7 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                 {gameType.replace('shipcaptaincrew', 'Ship Captain Crew')}
               </h1>
               <p className="text-text-secondary">
-                Min: ${gameConfig.config.minBet} | Max: ${gameConfig.config.maxBet} | House Edge: {(gameConfig.config.houseEdge * 100).toFixed(1)}%
+                Min: {gameConfig.config.minBet} ${STAKING_TOKEN.symbol} | Max: {gameConfig.config.maxBet} ${STAKING_TOKEN.symbol} | House Edge: {(gameConfig.config.houseEdge * 100).toFixed(1)}%
               </p>
             </div>
           </div>
@@ -167,7 +168,7 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
 
               <div className="mb-6">
                 <label className="block text-text-secondary text-sm mb-2">
-                  Bet Amount ($)
+                  Bet Amount (${STAKING_TOKEN.symbol})
                 </label>
                 <div className="flex items-center space-x-2">
                   <button
@@ -204,7 +205,7 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-text-secondary">Potential Win:</span>
                   <span className="text-primary font-semibold">
-                    ${(betAmount * gameConfig.config.baseMultiplier).toFixed(2)}
+                    {(betAmount * gameConfig.config.baseMultiplier).toFixed(2)} ${PAYOUT_TOKEN.symbol}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

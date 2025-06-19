@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useSupportedGames } from '../hooks/useSupportedGames';
 import { SupportedGame } from '../services/gameApi';
+import { STAKING_TOKEN } from '../config/tokens';
 
 interface GameLobbyProps {
   onGameSelect: (gameType: string) => void;
@@ -66,13 +67,13 @@ const GameCard: React.FC<{
           <div className="bg-background-tertiary rounded-lg p-2">
             <p className="text-xs text-text-secondary">Min Bet</p>
             <p className="text-sm font-semibold text-primary">
-              ${game.config.minBet.toFixed(2)}
+              {game.config.minBet.toFixed(2)} ${STAKING_TOKEN.symbol}
             </p>
           </div>
           <div className="bg-background-tertiary rounded-lg p-2">
             <p className="text-xs text-text-secondary">Max Bet</p>
             <p className="text-sm font-semibold text-primary">
-              ${game.config.maxBet.toFixed(2)}
+              {game.config.maxBet.toFixed(2)} ${STAKING_TOKEN.symbol}
             </p>
           </div>
         </div>
