@@ -23,7 +23,7 @@ const AppContent: React.FC = () => {
       }:${authToken}`;
       setAuthToken(token);
     }
-  }, [isAuthenticated, authToken]);
+  }, [isAuthenticated]);
 
   // Auto-login when wallet connects
   useEffect(() => {

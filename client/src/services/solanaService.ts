@@ -12,6 +12,7 @@ import {
   createAssociatedTokenAccountInstruction,
   getAccount,
   TokenAccountNotFoundError,
+  TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
 import { WalletContextState } from "@solana/wallet-adapter-react";
 
@@ -46,17 +47,31 @@ export class SolanaService {
       // Get associated token accounts
       const payerTokenAccount = await getAssociatedTokenAddress(
         tokenMint,
-        payer
+        payer,
+        undefined,
+        TOKEN_2022_PROGRAM_ID
       );
 
+      console.log(
+        tokenMint.toString(),
+        payer.toString(),
+        payerTokenAccount.toString()
+      );
       const recipientTokenAccount = await getAssociatedTokenAddress(
         tokenMint,
-        recipient
+        recipient,
+        undefined,
+        TOKEN_2022_PROGRAM_ID
       );
 
       // Check if payer has the token account
       try {
-        await getAccount(this.connection, payerTokenAccount);
+        await getAccount(
+          this.connection,
+          payerTokenAccount,
+          undefined,
+          TOKEN_2022_PROGRAM_ID
+        );
       } catch (error) {
         if (error instanceof TokenAccountNotFoundError) {
           throw new Error(
@@ -80,7 +95,8 @@ export class SolanaService {
               payer, // payer
               recipientTokenAccount, // associated token account
               recipient, // owner
-              tokenMint // token mint
+              tokenMint, // token mint,
+              TOKEN_2022_PROGRAM_ID
             )
           );
         }
