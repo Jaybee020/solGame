@@ -21,7 +21,7 @@ payoutQueue.process(async function (job, done) {
       job.data.amount,
       job.data.recipientAddress,
       job.data.tokenMintAddress,
-      job.data.payerKeypair
+      MANAGER_KEYPAIR
     );
     done();
   } catch (error: any) {
@@ -34,7 +34,6 @@ export const payOutWorker = new CronJob("*/1 * * * *", async function () {
   try {
     const pendingPayouts = await GameSessionService.getPendingPayouts();
     for (const session of pendingPayouts) {
-      console.log(session.sessionId);
       if (!session.result?.winAmount || session.result.winAmount <= 0) {
         return;
       }
@@ -47,7 +46,6 @@ export const payOutWorker = new CronJob("*/1 * * * *", async function () {
         amount: session.result.winAmount,
         recipientAddress: user?.walletAddress,
         tokenMintAddress: PAYOUT_TOKEN.mint,
-        payerKeypair: MANAGER_KEYPAIR,
       });
     }
   } catch (error) {

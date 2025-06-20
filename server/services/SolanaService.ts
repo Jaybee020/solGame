@@ -10,6 +10,8 @@ import {
   TOKEN_PROGRAM_ID,
   getAssociatedTokenAddress,
   createTransferInstruction,
+  createAssociatedTokenAccountInstruction,
+  TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
 import { consoleLogger } from "./logger/pinoLogger";
 
@@ -96,12 +98,16 @@ export class SolanaService {
 
       const payerTokenAccount = await getAssociatedTokenAddress(
         tokenMint,
-        payer
+        payer,
+        undefined,
+        TOKEN_2022_PROGRAM_ID
       );
 
       const recipientTokenAccount = await getAssociatedTokenAddress(
         tokenMint,
-        recipient
+        recipient,
+        undefined,
+        TOKEN_2022_PROGRAM_ID
       );
 
       const tokenAccountInfo = await this.connection.getAccountInfo(
@@ -111,15 +117,13 @@ export class SolanaService {
       const transaction = new Transaction();
 
       if (!tokenAccountInfo) {
-        const { createAssociatedTokenAccountInstruction } = await import(
-          "@solana/spl-token"
-        );
         transaction.add(
           createAssociatedTokenAccountInstruction(
             payer,
             recipientTokenAccount,
             recipient,
-            tokenMint
+            tokenMint,
+            TOKEN_2022_PROGRAM_ID
           )
         );
       }
@@ -128,7 +132,9 @@ export class SolanaService {
         payerTokenAccount,
         recipientTokenAccount,
         payer,
-        amount
+        amount,
+        undefined,
+        TOKEN_2022_PROGRAM_ID
       );
 
       transaction.add(transferInstruction);
@@ -145,6 +151,7 @@ export class SolanaService {
       );
       return signature;
     } catch (error) {
+      console.log(error);
       consoleLogger.error(`Error initiating token payout: ${error}`);
       return null;
     }

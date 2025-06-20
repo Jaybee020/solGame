@@ -116,7 +116,9 @@ export class SolanaService {
           payerTokenAccount, // source
           recipientTokenAccount, // destination
           payer, // owner
-          tokenAmount // amount
+          tokenAmount, // amount,
+          undefined,
+          TOKEN_2022_PROGRAM_ID
         )
       );
 
