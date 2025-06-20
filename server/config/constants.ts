@@ -8,11 +8,9 @@ config();
 
 export const MONGO_URI = "mongodb://localhost:27017/solGame";
 export const REDIS_URL = process.env.REDIS_URL || "127.0.0.1:6379";
-export const HELIUS_RPC_URL = `https://mainnet.helius-rpc.com/?api-key=d09a2fbb-81a4-49d6-b9ed-16d09a4ba09c`;
 export const cluster = "mainnet";
 export const SOLANA_RPC_URL =
-  process.env.SOLANA_RPC_URL ||
-  "https://mainnet.helius-rpc.com/?api-key=d09a2fbb-81a4-49d6-b9ed-16d09a4ba09c";
+  process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
 export const SOLANA_WS_URL =
   process.env.SOLANA_WS_URL || "wss://api.mainnet-beta.solana.com";
 export const rpcConnection = new Connection(SOLANA_RPC_URL, "confirmed");
