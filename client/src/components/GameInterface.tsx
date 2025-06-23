@@ -25,7 +25,7 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
 }) => {
   const wallet = useWallet();
   const { gameState, createGame, playMove, autoPlay, resetGame } = useGame();
-  const { getGameConfig } = useSupportedGames();
+  const { getGameConfig, isLoading: isLoadingGames } = useSupportedGames();
   const [betAmount, setBetAmount] = useState(1);
   const [showResult, setShowResult] = useState(false);
   const [depositStatus, setDepositStatus] = useState<DepositStatus>('idle');
@@ -148,6 +148,24 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
     }
   };
 
+  // Show loading state while games are being fetched
+  if (isLoadingGames) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading-spinner w-16 h-16 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-text-primary mb-2">
+            Loading Game...
+          </h2>
+          <p className="text-text-secondary">
+            Please wait while we prepare your game
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error only after loading is complete and game config is still not found
   if (!gameConfig) {
     return (
       <div className="min-h-screen flex items-center justify-center">

@@ -14,6 +14,7 @@ const AppContent: React.FC = () => {
   const { isAuthenticated, authToken, setAuthToken } = useAuth();
   const { connected, publicKey } = useWallet();
   const [currentGame, setCurrentGame] = useState<string | null>(null);
+  const [isGameTransitioning, setIsGameTransitioning] = useState(false);
 
   // Set up API authentication when user logs in
   useEffect(() => {
@@ -46,11 +47,17 @@ const AppContent: React.FC = () => {
   };
 
   const handleGameSelect = (gameType: string) => {
-    setCurrentGame(gameType);
+    setIsGameTransitioning(true);
+    // Small delay to show the transition loading state
+    setTimeout(() => {
+      setCurrentGame(gameType);
+      setIsGameTransitioning(false);
+    }, 300);
   };
 
   const handleBackToLobby = () => {
     setCurrentGame(null);
+    setIsGameTransitioning(false);
   };
 
   const isWalletConnected = connected && isAuthenticated;
@@ -86,7 +93,19 @@ const AppContent: React.FC = () => {
       </div> */}
       {/* Main Content */}
       <main>
-        {currentGame ? (
+        {isGameTransitioning ? (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+              <div className="loading-spinner w-16 h-16 mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-text-primary mb-2">
+                Starting Game...
+              </h2>
+              <p className="text-text-secondary">
+                Please wait while we prepare your game experience
+              </p>
+            </div>
+          </div>
+        ) : currentGame ? (
           <GameInterface
             gameType={currentGame}
             onBackToLobby={handleBackToLobby}
@@ -109,6 +128,7 @@ const AppContent: React.FC = () => {
           <div>Wallet Connected: {connected ? "Yes" : "No"}</div>
           <div>Authenticated: {isAuthenticated ? "Yes" : "No"}</div>
           <div>Current Game: {currentGame || "None"}</div>
+          <div>Game Transitioning: {isGameTransitioning ? "Yes" : "No"}</div>
           <div>Auth Token: {authToken ? "Set" : "Not Set"}</div>
         </div>
       )}
