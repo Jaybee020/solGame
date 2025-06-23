@@ -39,13 +39,24 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
 
   // Handle showing result when game completes or when we get game data
   useEffect(() => {
-    // Try to get the dice results from different possible locations
-    const diceResults = gameData?.rolls || gameState.result?.gameData?.rolls || gameState.result?.rolls;
+    // Get dice results from the most reliable source
+    let diceResults: number[] = [];
     
-    if (diceResults && diceResults.length > 0 && !showResult && (isCompleted || gameData)) {
+    // Priority order: current roll, then game result data, then stored rolls
+    if (gameData?.currentRoll && Array.isArray(gameData.currentRoll)) {
+      diceResults = gameData.currentRoll;
+    } else if (gameState.result?.gameData?.rolls && Array.isArray(gameState.result.gameData.rolls)) {
+      diceResults = gameState.result.gameData.rolls;
+    } else if (gameData?.rolls && Array.isArray(gameData.rolls)) {
+      // For rolls array, get the last 5 dice (most recent roll)
+      const totalRolls = gameData.rolls.length;
+      diceResults = gameData.rolls.slice(Math.max(0, totalRolls - 5));
+    }
+    
+    // Show result if we have dice and game is completed or we have a final result
+    if (diceResults.length > 0 && !showResult && (isCompleted || gameState.result)) {
       setRolledDice(diceResults);
       setShowResult(true);
-      setIsRolling(false);
     }
   }, [isCompleted, gameData, gameState.result, showResult]);
 
@@ -69,12 +80,17 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
     setTimeout(async () => {
       try {
         // Make the actual roll
-        await playMove({
+        const success = await playMove({
           action: 'roll',
           data: {}
         });
         
-        // The useEffect will handle showing the result when gameData updates
+        // Always stop rolling after API call completes
+        setIsRolling(false);
+        
+        if (!success) {
+          console.error('Roll move failed');
+        }
       } catch (error) {
         console.error('Error rolling dice:', error);
         setIsRolling(false);
@@ -254,7 +270,7 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
             <div className="text-primary text-2xl mb-2">💰</div>
             <div className="text-primary font-semibold">Cargo Value</div>
             <div className="text-2xl font-bold text-primary">
-              {gameData.cargoValue || 0}
+              {gameData.cargoSum || gameData.cargoValue || 0}
             </div>
           </div>
         )}
@@ -286,26 +302,35 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
         </h3>
         
         <div className="grid grid-cols-5 gap-4 mb-6">
-          {/* Show rolled dice if we have them, otherwise show empty dice */}
-          {(showResult || isCompleted) && rolledDice.length > 0 ? (
-            rolledDice.map((value: number, index: number) => (
-              <div key={index}>
-                {renderDice(value, `Die ${index + 1}`, index)}
-              </div>
-            ))
-          ) : gameData?.currentRoll ? (
-            gameData.currentRoll.map((value: number, index: number) => (
-              <div key={index}>
-                {renderDice(value, `Die ${index + 1}`, index)}
-              </div>
-            ))
-          ) : (
-            Array.from({ length: 5 }, (_, i) => (
-              <div key={i}>
-                {renderDice(undefined, `Die ${i + 1}`, i)}
-              </div>
-            ))
-          )}
+          {/* Show rolled dice based on game state priority */}
+          {(() => {
+            // Priority: completed game result dice > current roll dice > rolled dice > empty dice
+            let dicesToShow: number[] = [];
+            
+            if ((isCompleted || gameState.result) && rolledDice.length > 0) {
+              dicesToShow = rolledDice;
+            } else if (gameData?.currentRoll && Array.isArray(gameData.currentRoll)) {
+              dicesToShow = gameData.currentRoll;
+            } else if (gameData?.rolls && Array.isArray(gameData.rolls) && gameData.rolls.length > 0) {
+              // Get last 5 dice from rolls array
+              const totalRolls = gameData.rolls.length;
+              dicesToShow = gameData.rolls.slice(Math.max(0, totalRolls - 5));
+            }
+            
+            if (dicesToShow.length > 0) {
+              return dicesToShow.map((value: number, index: number) => (
+                <div key={index}>
+                  {renderDice(value, `Die ${index + 1}`, index)}
+                </div>
+              ));
+            } else {
+              return Array.from({ length: 5 }, (_, i) => (
+                <div key={i}>
+                  {renderDice(undefined, `Die ${i + 1}`, i)}
+                </div>
+              ));
+            }
+          })()}
         </div>
 
         {/* Roll Information */}
@@ -316,7 +341,7 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
         )}
 
         {/* Roll Button */}
-        {isPlaying && !isCompleted && (
+        {isPlaying && !isCompleted && !gameState.result && (
           <div className="space-y-4">
             {/* Game Status */}
             <div className="text-center p-3 bg-background-tertiary rounded-lg">
@@ -331,7 +356,7 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
 
             <button
               onClick={handleRoll}
-              disabled={isRolling || showResult || (gameData?.rollNumber >= (gameData?.maxRolls || 3))}
+              disabled={isRolling || isCompleted || gameState.result || (gameData?.rollNumber >= (gameData?.maxRolls || 3))}
               className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isRolling ? (
@@ -339,10 +364,10 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
                   <div className="loading-spinner w-5 h-5" />
                   <span>Rolling Dice...</span>
                 </div>
+              ) : (isCompleted || gameState.result) ? (
+                'Game Complete'
               ) : (gameData?.rollNumber >= (gameData?.maxRolls || 3)) ? (
                 'Max Rolls Reached'
-              ) : showResult ? (
-                'Roll Complete'
               ) : (
                 `Roll Dice ${gameData?.rollNumber ? `(${gameData.rollNumber}/${gameData.maxRolls || 3})` : ''}`
               )}
@@ -387,7 +412,7 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
       {renderGameRules()}
 
       {/* Game Result */}
-      {isCompleted && (
+      {(isCompleted || gameState.result) && (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -410,7 +435,7 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
              (gameState.result?.gameData?.hasShip && gameState.result?.gameData?.hasCaptain && gameState.result?.gameData?.hasCrew) ? (
               <>
                 ⚓ Ship, 👨‍✈️ Captain, 👥 Crew found!<br />
-                💰 Cargo Value: {gameData?.cargoValue || gameState.result?.gameData?.cargoValue || 0}
+                💰 Cargo Value: {gameData?.cargoSum || gameData?.cargoValue || gameState.result?.gameData?.cargoSum || gameState.result?.outcome?.cargoSum || 0}
                 {rolledDice.length > 0 && (
                   <div className="mt-2">
                     <div className="text-sm">Final Roll: {rolledDice.join(', ')}</div>
