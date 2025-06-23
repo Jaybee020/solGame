@@ -18,30 +18,154 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
   onNewGame,
 }) => {
   const [isRolling, setIsRolling] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [rolledDice, setRolledDice] = useState<number[]>([]);
 
   const gameData = gameState.gameData;
   const isPlaying = gameState.status === 'playing';
   const isCompleted = gameState.status === 'completed';
 
+  // Remove auto-play - let user interact first
   useEffect(() => {
-    // Auto-play ship captain crew game once it's created
-    if (isPlaying && !gameData?.hasRolled) {
-      handleRoll();
+    // Only setup initial state, don't auto-roll
+    if (isPlaying && !gameData?.gameStarted) {
+      // Initialize game state if needed
+      playMove({
+        action: 'initialize',
+        data: {}
+      });
     }
   }, [isPlaying, gameData]);
 
-  const handleRoll = async () => {
-    setIsRolling(true);
+  // Handle showing result when game completes or when we get game data
+  useEffect(() => {
+    // Try to get the dice results from different possible locations
+    const diceResults = gameData?.rolls || gameState.result?.gameData?.rolls || gameState.result?.rolls;
     
-    // Add rolling animation delay
-    setTimeout(async () => {
-      await autoPlay();
+    if (diceResults && diceResults.length > 0 && !showResult && (isCompleted || gameData)) {
+      setRolledDice(diceResults);
+      setShowResult(true);
       setIsRolling(false);
+    }
+  }, [isCompleted, gameData, gameState.result, showResult]);
+
+  // Reset state when game starts
+  useEffect(() => {
+    if (isPlaying && !isCompleted) {
+      setShowResult(false);
+      setRolledDice([]);
+      setIsRolling(false);
+    }
+  }, [isPlaying, isCompleted]);
+
+  const handleRoll = async () => {
+    if (!isPlaying) return;
+    
+    setIsRolling(true);
+    setShowResult(false);
+    setRolledDice([]);
+
+    // Start rolling animation for 3 seconds, then make the API call
+    setTimeout(async () => {
+      try {
+        // Make the actual roll
+        await playMove({
+          action: 'roll',
+          data: {}
+        });
+        
+        // The useEffect will handle showing the result when gameData updates
+      } catch (error) {
+        console.error('Error rolling dice:', error);
+        setIsRolling(false);
+      }
     }, 3000);
   };
 
-  const renderDice = (value?: number, label?: string) => {
-    const dots = [
+  const renderDice = (value?: number, label?: string, index: number = 0) => {
+    const shouldAnimate = isRolling && !isCompleted && !showResult;
+    
+    return (
+      <div className="text-center">
+        <motion.div
+          key={`dice-${gameState.sessionId}-${showResult ? 'result' : 'rolling'}-${index}`}
+          animate={shouldAnimate ? { 
+            rotateX: [0, 180, 360, 540, 720],
+            rotateY: [0, 180, 360, 540, 720],
+            scale: [1, 1.05, 1, 1.05, 1]
+          } : {
+            rotateX: 0,
+            rotateY: 0,
+            scale: 1
+          }}
+          transition={{ 
+            duration: shouldAnimate ? 1.5 : 0.5, 
+            repeat: shouldAnimate ? Infinity : 0,
+            ease: shouldAnimate ? "easeInOut" : "easeOut",
+            delay: shouldAnimate ? index * 0.1 : 0 // Stagger the animations
+          }}
+          className="relative mx-auto mb-2"
+        >
+          {/* Main dice container */}
+          <div className={`
+            w-16 h-16 rounded-lg shadow-xl border-2 relative transform-gpu
+            ${value ? 'bg-gradient-to-br from-white to-gray-100 border-gray-300' : 'bg-gradient-to-br from-primary/20 to-primary/10 border-primary/30'}
+            ${shouldAnimate ? 'animate-pulse' : ''}
+          `}>
+            {/* Dice value display with dots */}
+            {value ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+                className="absolute inset-0 p-1"
+              >
+                <div className="grid grid-cols-3 gap-0.5 h-full">
+                  {Array.from({ length: 9 }, (_, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-full ${
+                        getDotPattern(value).includes(i) 
+                          ? 'bg-gray-800' 
+                          : 'bg-transparent'
+                      }`}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                {shouldAnimate ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+                    className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full"
+                  />
+                ) : (
+                  <span className="text-lg text-primary/60">?</span>
+                )}
+              </div>
+            )}
+            
+            {/* Gloss effect */}
+            <div className="absolute top-1 left-1 w-3 h-3 bg-white/30 rounded-full blur-sm" />
+            
+            {/* Edge highlighting */}
+            <div className="absolute inset-0 rounded-lg border border-white/20" />
+          </div>
+          
+          {/* Shadow */}
+          <div className="absolute top-1 left-1 w-16 h-16 bg-black/10 rounded-lg blur-sm -z-10" />
+        </motion.div>
+        {label && (
+          <div className="text-xs text-text-secondary font-medium">{label}</div>
+        )}
+      </div>
+    );
+  };
+
+  const getDotPattern = (value: number): number[] => {
+    const patterns = [
       [],
       [4], // 1
       [0, 8], // 2
@@ -50,41 +174,7 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
       [0, 2, 4, 6, 8], // 5
       [0, 2, 3, 5, 6, 8] // 6
     ];
-
-    return (
-      <div className="text-center">
-        <motion.div
-          animate={isRolling ? { rotateX: 360, rotateY: 360 } : {}}
-          transition={{ 
-            duration: 0.5, 
-            repeat: isRolling ? Infinity : 0,
-            delay: Math.random() * 0.5 // Stagger the animations
-          }}
-          className="w-20 h-20 bg-white rounded-lg shadow-lg border-2 border-gray-300 relative mx-auto mb-2"
-        >
-          <div className="absolute inset-0 grid grid-cols-3 gap-1 p-2">
-            {Array.from({ length: 9 }, (_, i) => (
-              <div
-                key={i}
-                className={`rounded-full ${
-                  value && dots[value].includes(i) 
-                    ? 'bg-gray-800' 
-                    : 'bg-transparent'
-                }`}
-              />
-            ))}
-          </div>
-          {!value && isRolling && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-3 h-3 bg-gray-800 rounded-full animate-bounce" />
-            </div>
-          )}
-        </motion.div>
-        {label && (
-          <div className="text-sm text-text-secondary">{label}</div>
-        )}
-      </div>
-    );
+    return patterns[value] || [];
   };
 
   const renderGameRules = () => (
@@ -196,16 +286,23 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
         </h3>
         
         <div className="grid grid-cols-5 gap-4 mb-6">
-          {gameData?.currentRoll ? (
+          {/* Show rolled dice if we have them, otherwise show empty dice */}
+          {(showResult || isCompleted) && rolledDice.length > 0 ? (
+            rolledDice.map((value: number, index: number) => (
+              <div key={index}>
+                {renderDice(value, `Die ${index + 1}`, index)}
+              </div>
+            ))
+          ) : gameData?.currentRoll ? (
             gameData.currentRoll.map((value: number, index: number) => (
               <div key={index}>
-                {renderDice(value, `Die ${index + 1}`)}
+                {renderDice(value, `Die ${index + 1}`, index)}
               </div>
             ))
           ) : (
             Array.from({ length: 5 }, (_, i) => (
               <div key={i}>
-                {renderDice(undefined, `Die ${i + 1}`)}
+                {renderDice(undefined, `Die ${i + 1}`, i)}
               </div>
             ))
           )}
@@ -219,21 +316,38 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
         )}
 
         {/* Roll Button */}
-        {!gameData?.isComplete && !isCompleted && (
-          <button
-            onClick={handleRoll}
-            disabled={isRolling}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isRolling ? (
-              <div className="flex items-center justify-center space-x-2">
-                <div className="loading-spinner w-5 h-5" />
-                <span>Rolling...</span>
-              </div>
-            ) : (
-              'Roll Dice'
-            )}
-          </button>
+        {isPlaying && !isCompleted && (
+          <div className="space-y-4">
+            {/* Game Status */}
+            <div className="text-center p-3 bg-background-tertiary rounded-lg">
+              <div className="text-sm text-text-secondary mb-1">Current Bet</div>
+              <div className="text-lg font-semibold text-primary">${betAmount.toFixed(2)}</div>
+              {gameData?.rollNumber && (
+                <div className="text-xs text-text-secondary mt-1">
+                  Roll {gameData.rollNumber} of {gameData.maxRolls || 3}
+                </div>
+              )}
+            </div>
+
+            <button
+              onClick={handleRoll}
+              disabled={isRolling || showResult || (gameData?.rollNumber >= (gameData?.maxRolls || 3))}
+              className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isRolling ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="loading-spinner w-5 h-5" />
+                  <span>Rolling Dice...</span>
+                </div>
+              ) : (gameData?.rollNumber >= (gameData?.maxRolls || 3)) ? (
+                'Max Rolls Reached'
+              ) : showResult ? (
+                'Roll Complete'
+              ) : (
+                `Roll Dice ${gameData?.rollNumber ? `(${gameData.rollNumber}/${gameData.maxRolls || 3})` : ''}`
+              )}
+            </button>
+          </div>
         )}
       </div>
 
@@ -292,13 +406,26 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
           </h3>
 
           <div className="text-text-secondary mb-4">
-            {gameData?.hasShip && gameData?.hasCaptain && gameData?.hasCrew ? (
+            {(gameData?.hasShip && gameData?.hasCaptain && gameData?.hasCrew) || 
+             (gameState.result?.gameData?.hasShip && gameState.result?.gameData?.hasCaptain && gameState.result?.gameData?.hasCrew) ? (
               <>
                 ⚓ Ship, 👨‍✈️ Captain, 👥 Crew found!<br />
-                💰 Cargo Value: {gameData.cargoValue}
+                💰 Cargo Value: {gameData?.cargoValue || gameState.result?.gameData?.cargoValue || 0}
+                {rolledDice.length > 0 && (
+                  <div className="mt-2">
+                    <div className="text-sm">Final Roll: {rolledDice.join(', ')}</div>
+                  </div>
+                )}
               </>
             ) : (
-              'Could not find Ship, Captain, and Crew in time'
+              <>
+                Could not find Ship, Captain, and Crew in time
+                {rolledDice.length > 0 && (
+                  <div className="mt-2">
+                    <div className="text-sm">Final Roll: {rolledDice.join(', ')}</div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

@@ -158,6 +158,8 @@ export class SolanaService {
         }
       );
 
+      console.log("Confirmation", confirmation);
+
       return !confirmation.meta.err;
     } catch (error) {
       console.error("Error confirming transaction:", error);

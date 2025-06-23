@@ -20,6 +20,8 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
 }) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [selectedLines, setSelectedLines] = useState(3);
+  const [showResult, setShowResult] = useState(false);
+  const [spinResult, setSpinResult] = useState<any>(null);
 
   const gameData = gameState.gameData;
   const isPlaying = gameState.status === 'playing';
@@ -37,50 +39,117 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
     { id: 'scatter', symbol: '⭐', name: 'Star Scatter', color: '#FFD700' },
   ];
 
+  // Remove auto-play - let user interact first
   useEffect(() => {
-    // Auto-spin slots game once it's created
-    if (isPlaying && !gameData?.hasSpun) {
-      handleSpin();
+    // Only setup initial state, don't auto-spin
+    if (isPlaying && !gameData?.gameStarted) {
+      // Initialize game state
+      playMove({
+        action: 'initialize',
+        data: {}
+      });
     }
   }, [isPlaying, gameData]);
 
-  const handleSpin = async () => {
-    setIsSpinning(true);
+  // Handle showing result when game completes or when we get game data
+  useEffect(() => {
+    // Try to get the spin results from different possible locations
+    const reels = gameData?.reels || gameState.result?.gameData?.reels;
     
-    // Add spinning animation delay
-    setTimeout(async () => {
-      await autoPlay();
+    if (reels && !showResult && (isCompleted || gameData)) {
+      setSpinResult(gameData || gameState.result?.gameData);
+      setShowResult(true);
       setIsSpinning(false);
+    }
+  }, [isCompleted, gameData, gameState.result, showResult]);
+
+  // Reset state when game starts
+  useEffect(() => {
+    if (isPlaying && !isCompleted) {
+      setShowResult(false);
+      setSpinResult(null);
+      setIsSpinning(false);
+    }
+  }, [isPlaying, isCompleted]);
+
+  const handleSpin = async () => {
+    if (!isPlaying) return;
+    
+    setIsSpinning(true);
+    setShowResult(false);
+    setSpinResult(null);
+
+    // Start spinning animation for 3 seconds, then make the API call
+    setTimeout(async () => {
+      try {
+        // Make the actual spin
+        await playMove({
+          action: 'spin',
+          data: { paylines: selectedLines }
+        });
+        
+        // The useEffect will handle showing the result when gameData updates
+      } catch (error) {
+        console.error('Error spinning slots:', error);
+        setIsSpinning(false);
+      }
     }, 3000);
   };
 
-  const renderSymbol = (symbolId: string, isAnimated = false) => {
+  const renderSymbol = (symbolId: string, isAnimated = false, index = 0) => {
     const symbol = symbols.find(s => s.id === symbolId) || symbols[0];
+    const shouldAnimate = isAnimated && isSpinning && !showResult && !isCompleted;
     
     return (
       <motion.div
-        animate={isAnimated && isSpinning ? { y: [-20, 0, -20] } : {}}
-        transition={{ 
-          duration: 0.3, 
-          repeat: isAnimated && isSpinning ? Infinity : 0,
-          ease: "easeInOut" 
+        key={`symbol-${gameState.sessionId}-${showResult ? 'result' : 'spinning'}-${index}`}
+        animate={shouldAnimate ? { 
+          y: [-30, 30, -30],
+          rotateX: [0, 360],
+          scale: [1, 1.1, 1]
+        } : {
+          y: 0,
+          rotateX: 0,
+          scale: 1
         }}
-        className="text-4xl flex items-center justify-center h-20 w-20 rounded-lg border-2 border-primary/30 bg-background-tertiary"
+        transition={{ 
+          duration: shouldAnimate ? 0.4 : 0.3, 
+          repeat: shouldAnimate ? Infinity : 0,
+          ease: shouldAnimate ? "easeInOut" : "easeOut",
+          delay: shouldAnimate ? index * 0.1 : 0
+        }}
+        className={`text-4xl flex items-center justify-center h-20 w-20 rounded-lg border-2 shadow-lg transform-gpu
+          ${symbol ? 'border-primary/50 bg-gradient-to-br from-background-secondary to-background-tertiary' : 'border-primary/30 bg-background-tertiary'}
+          ${shouldAnimate ? 'animate-pulse' : ''}
+        `}
         style={{ color: symbol.color }}
       >
-        {symbol.symbol}
+        {shouldAnimate ? (
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 0.5, repeat: Infinity, ease: "linear" }}
+            className="text-2xl text-primary"
+          >
+            🎰
+          </motion.div>
+        ) : (
+          symbol.symbol
+        )}
       </motion.div>
     );
   };
 
   const renderSlotMachine = () => {
-    const reels = gameData?.reels || [
-      ['btc', 'eth', 'sol'],
-      ['eth', 'sol', 'ada'],
-      ['sol', 'ada', 'dot'],
-      ['ada', 'dot', 'link'],
-      ['dot', 'link', 'btc']
-    ];
+    // Use spin result if available, otherwise show default or spinning state
+    const reels = (showResult || isCompleted) && spinResult?.reels ? 
+      spinResult.reels : 
+      gameData?.reels || [
+        ['btc', 'eth', 'sol'],
+        ['eth', 'sol', 'ada'],
+        ['sol', 'ada', 'dot'],
+        ['ada', 'dot', 'link'],
+        ['dot', 'link', 'btc']
+      ];
 
     return (
       <div className="bg-gradient-to-b from-background-secondary to-background-tertiary p-6 rounded-xl border-2 border-primary/30">
@@ -90,7 +159,7 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
             <div key={reelIndex} className="space-y-2">
               {reel.map((symbolId: string, symbolIndex: number) => (
                 <div key={`${reelIndex}-${symbolIndex}`}>
-                  {renderSymbol(symbolId, isSpinning)}
+                  {renderSymbol(symbolId, true, reelIndex * 3 + symbolIndex)}
                 </div>
               ))}
             </div>
@@ -110,25 +179,38 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
         </div>
 
         {/* Spin Button */}
-        {!gameData?.hasSpun && !isCompleted && (
-          <button
-            onClick={handleSpin}
-            disabled={isSpinning}
-            className="w-full btn-primary text-xl py-4 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSpinning ? (
-              <div className="flex items-center justify-center space-x-2">
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                  className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full"
-                />
-                <span>Spinning...</span>
+        {isPlaying && !isCompleted && (
+          <div className="space-y-4">
+            {/* Game Status */}
+            <div className="text-center p-3 bg-background-tertiary rounded-lg">
+              <div className="text-sm text-text-secondary mb-1">Current Bet</div>
+              <div className="text-lg font-semibold text-primary">${(betAmount * selectedLines).toFixed(2)}</div>
+              <div className="text-xs text-text-secondary mt-1">
+                {selectedLines} paylines active
               </div>
-            ) : (
-              'SPIN'
-            )}
-          </button>
+            </div>
+
+            <button
+              onClick={handleSpin}
+              disabled={isSpinning || showResult || gameData?.hasSpun}
+              className="w-full btn-primary text-xl py-4 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSpinning ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full"
+                  />
+                  <span>Spinning...</span>
+                </div>
+              ) : (showResult || gameData?.hasSpun) ? (
+                'Spin Complete'
+              ) : (
+                '🎰 SPIN'
+              )}
+            </button>
+          </div>
         )}
       </div>
     );
@@ -194,7 +276,7 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
       </div>
 
       {/* Game Settings */}
-      {!gameData?.hasSpun && !isCompleted && (
+      {isPlaying && !isCompleted && (
         <div className="card">
           <h3 className="text-lg font-semibold text-text-primary mb-4">Game Settings</h3>
           
@@ -209,7 +291,7 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
               value={selectedLines}
               onChange={(e) => setSelectedLines(parseInt(e.target.value))}
               className="w-full h-2 bg-background-tertiary rounded-lg appearance-none cursor-pointer"
-              disabled={isSpinning}
+              disabled={isSpinning || showResult || gameData?.hasSpun}
             />
             <div className="flex justify-between text-xs text-text-secondary mt-1">
               <span>1 Line</span>
@@ -217,6 +299,49 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Spin Result Info */}
+      {showResult && spinResult && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.6 }}
+          className="card text-center"
+        >
+          <h3 className="text-lg font-semibold text-text-primary mb-4">Spin Result</h3>
+          
+          {spinResult.paylines && spinResult.paylines.length > 0 ? (
+            <div className="space-y-3">
+              <div className="text-2xl font-bold text-primary mb-2">
+                🎰 WINNING SPIN! 🎰
+              </div>
+              <div className="text-xl text-primary font-semibold">
+                Multiplier: {spinResult.totalMultiplier}x
+              </div>
+              {gameState.result?.winAmount && (
+                <div className="text-lg text-primary">
+                  Won: ${gameState.result.winAmount.toFixed(2)} {PAYOUT_TOKEN.symbol}
+                </div>
+              )}
+              <div className="mt-3 p-3 bg-primary/10 rounded-lg">
+                <div className="text-sm text-text-secondary mb-1">Winning combinations found!</div>
+                <div className="text-xs text-text-secondary">
+                  {spinResult.paylines.length} payline{spinResult.paylines.length > 1 ? 's' : ''} matched
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="text-xl text-text-secondary">
+                No winning combinations this time
+              </div>
+              <div className="text-sm text-text-secondary">
+                Try adjusting your paylines for better odds!
+              </div>
+            </div>
+          )}
+        </motion.div>
       )}
 
       {/* Winning Lines */}
@@ -275,8 +400,16 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
           </h3>
 
           {gameState.result?.isWin && (
-            <div className="text-lg text-primary font-semibold mb-4">
-              Won: ${gameState.result.winAmount.toFixed(2)}
+            <div className="space-y-2 mb-4">
+              <div className="text-lg text-primary font-semibold">
+                Won: ${gameState.result.winAmount.toFixed(2)} {PAYOUT_TOKEN.symbol}
+              </div>
+              {spinResult && (
+                <div className="text-sm text-text-secondary">
+                  Multiplier: {spinResult.totalMultiplier}x | 
+                  Paylines: {spinResult.paylines?.filter((p: any) => p.multiplier > 0).length || 0}
+                </div>
+              )}
             </div>
           )}
 

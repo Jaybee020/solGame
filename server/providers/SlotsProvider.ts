@@ -25,6 +25,8 @@ interface SlotsGameData {
   nonce: number;
   paylines: number;
   theme?: CryptoTheme;
+  hasSpun?: boolean;
+  gameStarted?: boolean;
 }
 
 interface SlotsResult {
@@ -160,11 +162,13 @@ export class SlotsProvider extends BaseGameProvider {
       nonce,
       paylines: 25,
       theme,
+      hasSpun: false,
+      gameStarted: false,
     };
 
     return {
       gameType: this.gameType,
-      status: "created",
+      status: "in_progress",
       currentData: gameData,
       history: [],
     };
@@ -173,6 +177,45 @@ export class SlotsProvider extends BaseGameProvider {
   async playGame(state: GameState, move?: GameMove): Promise<GameResult> {
     const gameData = state.currentData as SlotsGameData;
 
+    // Handle initialization
+    if (!move || move.action === 'initialize') {
+      gameData.gameStarted = true;
+      
+      return {
+        isWin: false,
+        multiplier: 0,
+        winAmount: 0,
+        gameData: {
+          hasSpun: false,
+          gameStarted: true,
+          paylines: gameData.paylines,
+          theme: gameData.theme,
+        },
+        outcome: { status: 'initialized' },
+      };
+    }
+
+    // Handle spin action
+    if (move.action === 'spin' && !gameData.hasSpun) {
+      return this.performSpin(gameData, state);
+    }
+
+    // If no valid action or already spun, return current state
+    return {
+      isWin: false,
+      multiplier: 0,
+      winAmount: 0,
+      gameData: {
+        hasSpun: gameData.hasSpun || false,
+        gameStarted: gameData.gameStarted || false,
+      },
+      outcome: { status: 'waiting' },
+    };
+  }
+
+  private performSpin(gameData: SlotsGameData, state: GameState): GameResult {
+    gameData.hasSpun = true;
+    
     const symbols = this.getSymbolsForTheme(gameData.theme);
     const weightedPool = this.createWeightedPool(symbols);
 

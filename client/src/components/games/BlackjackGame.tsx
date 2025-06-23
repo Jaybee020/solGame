@@ -6,6 +6,7 @@ interface Card {
   suit: number;
   rank: number;
   value: number;
+  faceDown?: boolean;
 }
 
 interface BlackjackGameProps {

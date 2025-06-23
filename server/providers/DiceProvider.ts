@@ -12,15 +12,22 @@ interface DiceGameData {
   serverSeed: string;
   clientSeed: string;
   nonce: number;
-  target: number;
-  isOver: boolean;
+  target?: number;
+  isOver?: boolean;
+  hasRolled?: boolean;
+  targetSet?: boolean;
 }
 
 interface DiceResult {
-  roll: number;
-  target: number;
-  isOver: boolean;
-  isWin: boolean;
+  roll?: number;
+  target?: number;
+  isOver?: boolean;
+  isWin?: boolean;
+  diceResult?: number;
+  prediction?: string;
+  targetNumber?: number;
+  hasRolled?: boolean;
+  targetSet?: boolean;
 }
 
 export class DiceProvider extends BaseGameProvider {
@@ -43,13 +50,13 @@ export class DiceProvider extends BaseGameProvider {
       serverSeed,
       clientSeed,
       nonce,
-      target: 50,
-      isOver: true,
+      hasRolled: false,
+      targetSet: false,
     };
 
     return {
       gameType: this.gameType,
-      status: "created",
+      status: "in_progress",
       currentData: gameData,
       history: [],
     };
@@ -58,50 +65,124 @@ export class DiceProvider extends BaseGameProvider {
   async playGame(state: GameState, move?: GameMove): Promise<GameResult> {
     const gameData = state.currentData as DiceGameData;
 
-    if (move) {
+    if (!move) {
+      // Return current state without rolling
+      return {
+        isWin: false,
+        multiplier: 0,
+        winAmount: 0,
+        gameData: {
+          hasRolled: gameData.hasRolled || false,
+          targetSet: gameData.targetSet || false,
+          target: gameData.target,
+          isOver: gameData.isOver,
+          prediction: gameData.isOver ? 'over' : 'under',
+          targetNumber: gameData.target,
+        },
+        outcome: { status: 'waiting' },
+      };
+    }
+
+    // Handle setting target
+    if (move.action === 'set_target') {
       if (move.data?.target !== undefined) {
-        gameData.target = Math.max(0.01, Math.min(99.99, move.data.target));
+        gameData.target = Math.max(1, Math.min(99, move.data.target));
       }
       if (move.data?.isOver !== undefined) {
         gameData.isOver = move.data.isOver;
       }
+      gameData.targetSet = true;
+
+      return {
+        isWin: false,
+        multiplier: 0,
+        winAmount: 0,
+        gameData: {
+          hasRolled: false,
+          targetSet: true,
+          target: gameData.target,
+          isOver: gameData.isOver,
+          prediction: gameData.isOver ? 'over' : 'under',
+          targetNumber: gameData.target,
+        },
+        outcome: { status: 'target_set' },
+      };
     }
 
-    const random = this.generateRandomNumber(
-      gameData.serverSeed,
-      gameData.clientSeed,
-      gameData.nonce
-    );
-    const roll = Math.floor(random * 10000) / 100;
+    // Handle dice roll
+    if (move.action === 'roll') {
+      // Update target and prediction if provided
+      if (move.data?.target !== undefined) {
+        gameData.target = Math.max(1, Math.min(99, move.data.target));
+      }
+      if (move.data?.isOver !== undefined) {
+        gameData.isOver = move.data.isOver;
+      }
 
-    const isWin = gameData.isOver
-      ? roll > gameData.target
-      : roll < gameData.target;
+      // Ensure we have target and prediction
+      if (gameData.target === undefined || gameData.isOver === undefined) {
+        throw new Error('Target and prediction must be set before rolling');
+      }
 
-    const winChance = gameData.isOver
-      ? (100 - gameData.target) / 100
-      : gameData.target / 100;
-    const payout = (1 - this.config.houseEdge) / winChance;
+      const random = this.generateRandomNumber(
+        gameData.serverSeed,
+        gameData.clientSeed,
+        gameData.nonce
+      );
+      const roll = Math.floor(random * 100) + 1; // 1-100 instead of 0.01-99.99
 
-    const multiplier = isWin ? payout : 0;
-    const winAmount = this.calculateWinnings(gameData.betAmount, multiplier);
+      const isWin = gameData.isOver
+        ? roll > gameData.target
+        : roll < gameData.target;
 
-    const result: DiceResult = {
-      roll,
-      target: gameData.target,
-      isOver: gameData.isOver,
-      isWin,
-    };
+      const winChance = gameData.isOver
+        ? (100 - gameData.target) / 100
+        : gameData.target / 100;
+      const payout = winChance > 0 ? (1 - this.config.houseEdge) / winChance : 0;
 
-    state.status = "completed";
-    state.history.push(result);
+      const multiplier = isWin ? payout : 0;
+      const winAmount = this.calculateWinnings(gameData.betAmount, multiplier);
 
+      gameData.hasRolled = true;
+      state.status = "completed";
+
+      const result: DiceResult = {
+        roll,
+        diceResult: roll,
+        target: gameData.target,
+        targetNumber: gameData.target,
+        isOver: gameData.isOver,
+        prediction: gameData.isOver ? 'over' : 'under',
+        isWin,
+        hasRolled: true,
+        targetSet: true,
+      };
+
+      state.history.push(result);
+
+      return {
+        isWin,
+        multiplier,
+        winAmount,
+        gameData: result,
+        outcome: { roll, isWin, multiplier },
+      };
+    }
+
+    // Default case - return current state
     return {
-      isWin,
-      multiplier,
-      winAmount,
-      gameData: result,
-      outcome: { roll, isWin, multiplier },
+      isWin: false,
+      multiplier: 0,
+      winAmount: 0,
+      gameData: {
+        hasRolled: gameData.hasRolled || false,
+        targetSet: gameData.targetSet || false,
+        target: gameData.target,
+        isOver: gameData.isOver,
+        prediction: gameData.isOver ? 'over' : 'under',
+        targetNumber: gameData.target,
+      },
+      outcome: { status: 'waiting' },
     };
   }
 }

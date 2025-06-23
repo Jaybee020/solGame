@@ -61,7 +61,8 @@ export const useGame = (): UseGameReturn => {
         updateGameState({
           sessionId: response.data.sessionId,
           gameType: response.data.gameType,
-          status: 'playing',
+          status: response.data.status === 'in_progress' ? 'playing' : 
+                  response.data.status === 'created' ? 'playing' : response.data.status,
           gameData: response.data.gameState,
           isLoading: false,
         });
@@ -109,7 +110,8 @@ export const useGame = (): UseGameReturn => {
       });
 
       if (response.success && response.data) {
-        const newStatus = response.data.status === 'completed' ? 'completed' : 'playing';
+        const newStatus = response.data.status === 'completed' ? 'completed' : 
+                         response.data.status === 'in_progress' ? 'playing' : response.data.status;
         
         updateGameState({
           status: newStatus,

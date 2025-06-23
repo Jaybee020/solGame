@@ -13,13 +13,17 @@ interface ShipCaptainCrewGameData {
   clientSeed: string;
   nonce: number;
   rolls: number[];
+  currentRoll?: number[];
   rollNumber: number;
   hasShip: boolean;
   hasCaptain: boolean;
   hasCrew: boolean;
   cargoSum: number;
+  cargoValue?: number;
   gamePhase: "rolling" | "finished";
   maxRolls: number;
+  gameStarted?: boolean;
+  hasRolled?: boolean;
 }
 
 interface ShipCaptainCrewResult {
@@ -125,8 +129,11 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
       hasCaptain: false,
       hasCrew: false,
       cargoSum: 0,
+      cargoValue: 0,
       gamePhase: "rolling",
       maxRolls: 3,
+      gameStarted: false,
+      hasRolled: false,
     };
 
     return {
@@ -149,6 +156,8 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
     }
 
     switch (move.action) {
+      case "initialize":
+        return this.handleInitialize(gameData, state);
       case "roll":
         return this.handleRoll(gameData, state);
       case "stop":
@@ -156,6 +165,30 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
       default:
         return this.autoPlay(gameData, state);
     }
+  }
+
+  private async handleInitialize(
+    gameData: ShipCaptainCrewGameData,
+    state: GameState
+  ): Promise<GameResult> {
+    gameData.gameStarted = true;
+
+    return {
+      isWin: false,
+      multiplier: 0,
+      winAmount: 0,
+      gameData: {
+        hasRolled: false,
+        gameStarted: true,
+        rollNumber: gameData.rollNumber,
+        maxRolls: gameData.maxRolls,
+        hasShip: gameData.hasShip,
+        hasCaptain: gameData.hasCaptain,
+        hasCrew: gameData.hasCrew,
+        cargoValue: gameData.cargoValue,
+      },
+      outcome: { status: 'initialized' },
+    };
   }
 
   private async autoPlay(
@@ -205,7 +238,9 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
       5
     );
     gameData.rolls.push(...dice);
+    gameData.currentRoll = dice;
     gameData.rollNumber++;
+    gameData.hasRolled = true;
 
     this.processRoll(dice, gameData);
 
@@ -225,13 +260,17 @@ export class ShipCaptainCrewProvider extends BaseGameProvider {
       multiplier: 0,
       winAmount: 0,
       gameData: {
-        rolls: gameData.rolls.slice(-5),
+        rolls: dice,
+        currentRoll: dice,
         rollNumber: gameData.rollNumber,
+        maxRolls: gameData.maxRolls,
         hasShip: gameData.hasShip,
         hasCaptain: gameData.hasCaptain,
         hasCrew: gameData.hasCrew,
         cargoSum: gameData.cargoSum,
+        cargoValue: gameData.cargoSum,
         gamePhase: gameData.gamePhase,
+        hasRolled: true,
       },
       outcome: {
         action: "roll",

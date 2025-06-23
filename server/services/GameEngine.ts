@@ -99,7 +99,7 @@ export class GameEngine {
         gameType: request.gameType,
         betAmount: request.betAmount,
         status: session.status,
-        gameState: this.sanitizeGameState(gameState),
+        gameState: this.sanitizeGameData(gameState.currentData),
         serverSeedHash: session.serverSeedHash,
       };
     } catch (error) {
@@ -183,7 +183,7 @@ export class GameEngine {
         status:
           currentState.status === "completed" ? "completed" : "in_progress",
         result: currentState.status === "completed" ? result : undefined,
-        gameState: this.sanitizeGameState(currentState),
+        gameState: this.sanitizeGameData(currentState.currentData),
         serverSeedHash: session.serverSeedHash,
       };
     } catch (error) {
@@ -219,7 +219,7 @@ export class GameEngine {
         betAmount: session.betAmount,
         status: session.status,
         result: session.result as any,
-        gameState: this.sanitizeGameState(session.currentState),
+        gameState: this.sanitizeGameData(session.currentState?.currentData),
         serverSeedHash: session.serverSeedHash,
       };
     } catch (error) {
@@ -268,7 +268,7 @@ export class GameEngine {
             }
           : undefined,
         gameState: session.completed
-          ? this.sanitizeGameState(session.currentState)
+          ? this.sanitizeGameData(session.currentState?.currentData)
           : undefined,
         serverSeedHash: session.serverSeedHash,
       }));
@@ -299,6 +299,16 @@ export class GameEngine {
       delete currentData.serverSeed;
       sanitized.currentData = currentData;
     }
+
+    return sanitized;
+  }
+
+  private sanitizeGameData(gameData: any): any {
+    if (!gameData) return null;
+
+    const sanitized = { ...gameData };
+    delete sanitized.serverSeed;
+    delete sanitized.deck;
 
     return sanitized;
   }

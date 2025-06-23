@@ -11,6 +11,7 @@ interface Card {
   suit: number;
   rank: number;
   value: number;
+  faceDown?: boolean;
 }
 
 interface BlackjackGameData {
@@ -154,8 +155,8 @@ export class BlackjackProvider extends BaseGameProvider {
     const shuffledDeck = this.shuffleDeck(deck, serverSeed, clientSeed, nonce);
 
     const playerHand = [shuffledDeck[0], shuffledDeck[2]];
-    const dealerHand = [shuffledDeck[1]];
-    const remainingDeck = shuffledDeck.slice(3);
+    const dealerHand = [shuffledDeck[1], { ...shuffledDeck[3], faceDown: true }];
+    const remainingDeck = shuffledDeck.slice(4);
 
     const gameData: BlackjackGameData = {
       betAmount,
@@ -165,9 +166,9 @@ export class BlackjackProvider extends BaseGameProvider {
       playerHand,
       dealerHand,
       deck: remainingDeck,
-      gamePhase: "dealing",
+      gamePhase: "player_turn",
       playerTotal: this.calculateHandValue(playerHand),
-      dealerTotal: this.calculateHandValue(dealerHand),
+      dealerTotal: this.calculateHandValue([dealerHand[0]]), // Only count visible card
       canDoubleDown: true,
       canSplit: playerHand[0].rank === playerHand[1].rank,
       canSurrender: true,
@@ -224,8 +225,12 @@ export class BlackjackProvider extends BaseGameProvider {
     gameData: BlackjackGameData,
     state: GameState
   ): Promise<GameResult> {
+    // Check for blackjack first
     if (this.isBlackjack(gameData.playerHand)) {
-      gameData.dealerHand.push(gameData.deck.shift()!);
+      // Reveal dealer's face-down card
+      if (gameData.dealerHand[1]?.faceDown) {
+        gameData.dealerHand[1].faceDown = false;
+      }
       gameData.dealerTotal = this.calculateHandValue(gameData.dealerHand);
 
       if (this.isBlackjack(gameData.dealerHand)) {
@@ -235,11 +240,20 @@ export class BlackjackProvider extends BaseGameProvider {
       }
     }
 
-    if (gameData.playerTotal > 21) {
-      return this.finishGame(gameData, state, "lose");
-    }
-
-    return this.dealerPlay(gameData, state);
+    // For normal gameplay, don't auto-finish - return current state for player decisions
+    state.currentData = gameData;
+    return {
+      isWin: false,
+      multiplier: 0,
+      winAmount: 0,
+      gameData: this.getGameDataForResponse(gameData),
+      outcome: {
+        action: "deal",
+        status: "continue",
+        playerTotal: gameData.playerTotal,
+        dealerTotal: gameData.dealerTotal,
+      },
+    };
   }
 
   private async handleHit(
@@ -346,6 +360,8 @@ export class BlackjackProvider extends BaseGameProvider {
       };
     }
 
+    // Player has finished all hands, now dealer plays
+    gameData.gamePhase = "dealer_turn";
     return this.dealerPlay(gameData, state);
   }
 
@@ -499,7 +515,10 @@ export class BlackjackProvider extends BaseGameProvider {
     gameData: BlackjackGameData,
     state: GameState
   ): Promise<GameResult> {
-    gameData.dealerHand.push(gameData.deck.shift()!);
+    // Reveal the face-down card
+    if (gameData.dealerHand[1]?.faceDown) {
+      gameData.dealerHand[1].faceDown = false;
+    }
     gameData.dealerTotal = this.calculateHandValue(gameData.dealerHand);
 
     gameData.actionHistory.push({
