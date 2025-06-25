@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { GameState } from "../../hooks/useGame";
 import { PAYOUT_TOKEN } from "../../config/tokens";
+import GameHistory from "../GameHistory";
 
 // Crypto data interfaces and configuration
 const COIN_IDS = [
@@ -131,7 +132,7 @@ const CryptoPriceTicker = ({ data }: { data: CryptoData[] | null }) => {
               coin.change24h >= 0 ? "text-green-400" : "text-red-400"
             }`}
           >
-            {coin.change24h >= 0 ? "▲" : "▼"} {coin.change24h.toFixed(2)}%
+            {coin.change24h >= 0 ? "▲" : "▼"} {coin.change24h?.toFixed(2)}%
           </div>
         </div>
       ))}
@@ -744,19 +745,19 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
                   100 +
                   (gameState.result?.winAmount || 0) -
                   betAmount * enabledLines.filter(Boolean).length
-                ).toFixed(2)}
+                )?.toFixed(2)}
                 isCurrency
               />
               <DigitalDisplay
                 label="Total Bet"
                 value={(
                   betAmount * enabledLines.filter(Boolean).length
-                ).toFixed(2)}
+                )?.toFixed(2)}
                 isCurrency
               />
               <DigitalDisplay
                 label="Win"
-                value={(gameState.result?.winAmount || 0).toFixed(2)}
+                value={(gameState.result?.winAmount || 0)?.toFixed(2)}
                 isCurrency
               />
             </div>
@@ -870,6 +871,16 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
               </motion.button>
             </div>
           </footer>
+        </div>
+
+        {/* Recent Games Section */}
+        <div className="w-full max-w-4xl mt-8">
+          <GameHistory
+            gameType="slots"
+            limit={5}
+            showTitle={true}
+            compact={true}
+          />
         </div>
       </div>
 

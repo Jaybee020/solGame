@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { GameState } from "../../hooks/useGame";
 import { PAYOUT_TOKEN } from "../../config/tokens";
+import GameHistory from "../GameHistory";
 
 interface DiceGameProps {
   gameState: GameState;
@@ -427,6 +428,16 @@ const DiceGame: React.FC<DiceGameProps> = ({
           </button>
         </motion.div>
       )}
+
+      {/* Recent Games Section */}
+      <div className="mt-8">
+        <GameHistory 
+          gameType="dice" 
+          limit={5} 
+          showTitle={true}
+          compact={true}
+        />
+      </div>
     </div>
   );
 };

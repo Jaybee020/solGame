@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameState } from '../../hooks/useGame';
+import GameHistory from '../GameHistory';
 
 interface Card {
   suit: number;
@@ -314,6 +315,16 @@ const BlackjackGame: React.FC<BlackjackGameProps> = ({
           </button>
         </motion.div>
       )}
+
+      {/* Recent Games Section */}
+      <div className="mt-8">
+        <GameHistory 
+          gameType="blackjack" 
+          limit={5} 
+          showTitle={true}
+          compact={true}
+        />
+      </div>
     </div>
   );
 };

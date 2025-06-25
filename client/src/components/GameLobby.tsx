@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useSupportedGames } from '../hooks/useSupportedGames';
 import { SupportedGame } from '../services/gameApi';
 import { STAKING_TOKEN } from '../config/tokens';
+import GameHistory from './GameHistory';
 
 interface GameLobbyProps {
   onGameSelect: (gameType: string) => void;
@@ -283,11 +284,27 @@ const GameLobby: React.FC<GameLobbyProps> = ({
           </div>
         )}
 
+        {/* Game History Section */}
+        {isWalletConnected && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="mt-16"
+          >
+            <GameHistory 
+              limit={10} 
+              showTitle={true}
+              compact={false}
+            />
+          </motion.div>
+        )}
+
         {/* Stats Section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.5 }}
           className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           <div className="card text-center">

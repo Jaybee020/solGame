@@ -234,7 +234,8 @@ export class GameEngine {
   async getUserGameHistory(
     userId: string,
     gameType?: GameType,
-    limit: number = 50
+    limit: number = 50,
+    offset: number = 0
   ): Promise<GameResponse[]> {
     try {
       let sessions;
@@ -242,7 +243,10 @@ export class GameEngine {
       if (gameType) {
         sessions = await this.sessionService.getByUserIdAndGameType(
           userId,
-          gameType
+          gameType,
+          false,
+          limit,
+          offset
         );
       } else {
         sessions = await this.sessionService.model
@@ -250,6 +254,7 @@ export class GameEngine {
             userId: new Types.ObjectId(userId),
           })
           .sort({ createdAt: -1 })
+          .skip(offset)
           .limit(limit);
       }
 

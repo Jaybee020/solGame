@@ -357,16 +357,17 @@ gameRouter.get(
   authenticatetoken,
   async (req: Req, res: Response): Promise<void> => {
     try {
-      const { gameType, limit } = req.query;
+      const { gameType, limit, offset } = req.query;
 
       const schema = Joi.object({
         gameType: Joi.string()
           .valid("blackjack", "dice", "slots", "shipcaptaincrew")
           .optional(),
         limit: Joi.number().integer().min(1).max(100).optional(),
+        offset: Joi.number().integer().min(0).optional(),
       });
 
-      const { error } = schema.validate({ gameType, limit });
+      const { error } = schema.validate({ gameType, limit, offset });
       if (error) {
         res.status(422).json({
           success: false,
@@ -388,7 +389,8 @@ gameRouter.get(
       const gameHistory = await GameEngine.getUserGameHistory(
         userId,
         gameType as GameType,
-        limit ? parseInt(limit as string) : 50
+        limit ? parseInt(limit as string) : 50,
+        offset ? parseInt(offset as string) : 0
       );
 
       res.status(200).json({

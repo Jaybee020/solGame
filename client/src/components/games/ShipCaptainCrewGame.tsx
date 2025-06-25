@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { GameState } from '../../hooks/useGame';
+import GameHistory from '../GameHistory';
 
 interface ShipCaptainCrewGameProps {
   gameState: GameState;
@@ -468,6 +469,16 @@ const ShipCaptainCrewGame: React.FC<ShipCaptainCrewGameProps> = ({
           </button>
         </motion.div>
       )}
+
+      {/* Recent Games Section */}
+      <div className="mt-8">
+        <GameHistory 
+          gameType="shipcaptaincrew" 
+          limit={5} 
+          showTitle={true}
+          compact={true}
+        />
+      </div>
     </div>
   );
 };

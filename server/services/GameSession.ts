@@ -68,24 +68,39 @@ class GameSessionService {
   async getByUserIdAndGameType(
     userId: string,
     gameType: GameType,
-    shouldPopulateUserId = false
+    shouldPopulateUserId = false,
+    limit?: number,
+    offset?: number
   ): Promise<IGameSession[]> {
     try {
+      let query;
+      
       if (shouldPopulateUserId) {
-        return await this.model
+        query = this.model
           .find({
             userId: new Types.ObjectId(userId),
             gameType,
           })
           .populate("userId")
           .sort({ createdAt: -1 });
+      } else {
+        query = this.model
+          .find({
+            userId: new Types.ObjectId(userId),
+            gameType,
+          })
+          .sort({ createdAt: -1 });
       }
-      return await this.model
-        .find({
-          userId: new Types.ObjectId(userId),
-          gameType,
-        })
-        .sort({ createdAt: -1 });
+      
+      if (offset !== undefined) {
+        query = query.skip(offset);
+      }
+      
+      if (limit !== undefined) {
+        query = query.limit(limit);
+      }
+      
+      return await query;
     } catch (error) {
       throw new Error(
         `Failed to get sessions by user ID and game type: ${error}`
