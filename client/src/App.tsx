@@ -6,6 +6,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { gameApi } from "./services/gameApi";
 import GameLobby from "./components/GameLobby";
 import GameInterface from "./components/GameInterface";
+import BalancePage from "./components/BalancePage";
 import Header from "./components/Header";
 import "./App.css";
 
@@ -15,6 +16,7 @@ const AppContent: React.FC = () => {
   const { connected, publicKey } = useWallet();
   const [currentGame, setCurrentGame] = useState<string | null>(null);
   const [isGameTransitioning, setIsGameTransitioning] = useState(false);
+  const [currentPage, setCurrentPage] = useState<'lobby' | 'balance' | 'game'>('lobby');
 
   // Set up API authentication when user logs in
   useEffect(() => {
@@ -51,20 +53,30 @@ const AppContent: React.FC = () => {
     // Small delay to show the transition loading state
     setTimeout(() => {
       setCurrentGame(gameType);
+      setCurrentPage('game');
       setIsGameTransitioning(false);
     }, 300);
   };
 
   const handleBackToLobby = () => {
     setCurrentGame(null);
+    setCurrentPage('lobby');
     setIsGameTransitioning(false);
+  };
+
+  const handleNavigateToBalance = () => {
+    setCurrentPage('balance');
+  };
+
+  const handleBackFromBalance = () => {
+    setCurrentPage('lobby');
   };
 
   const isWalletConnected = connected && isAuthenticated;
 
   return (
     <div className="min-h-screen bg-background-primary">
-      <Header />
+      <Header onNavigateToBalance={handleNavigateToBalance} />
       {/* Wallet Connection Bar
       <div className="bg-background-secondary border-b border-white/10 p-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
@@ -105,12 +117,14 @@ const AppContent: React.FC = () => {
               </p>
             </div>
           </div>
-        ) : currentGame ? (
+        ) : currentPage === 'game' && currentGame ? (
           <GameInterface
             gameType={currentGame}
             onBackToLobby={handleBackToLobby}
             isWalletConnected={isWalletConnected}
           />
+        ) : currentPage === 'balance' ? (
+          <BalancePage onBackToLobby={handleBackFromBalance} />
         ) : (
           <GameLobby
             onGameSelect={handleGameSelect}

@@ -131,6 +131,41 @@ class GameApiClient {
     return this.request<GameResponse>("POST", "/games/create", request);
   }
 
+  // Create a new game session using balance deduction (convenience method)
+  async createGameWithBalance(
+    gameType: string,
+    betAmount: number,
+    clientSeed?: string,
+    deviceFingerprint?: string
+  ): Promise<ApiResponse<GameResponse>> {
+    const request: CreateGameRequest = {
+      gameType,
+      betAmount,
+      clientSeed,
+      deviceFingerprint,
+      // No depositTxHash - this triggers balance-based flow
+    };
+    return this.createGame(request);
+  }
+
+  // Create a new game session using transaction verification (convenience method)
+  async createGameWithTransaction(
+    gameType: string,
+    betAmount: number,
+    depositTxHash: string,
+    clientSeed?: string,
+    deviceFingerprint?: string
+  ): Promise<ApiResponse<GameResponse>> {
+    const request: CreateGameRequest = {
+      gameType,
+      betAmount,
+      clientSeed,
+      deviceFingerprint,
+      depositTxHash,
+    };
+    return this.createGame(request);
+  }
+
   // Play a game (make moves)
   async playGame(request: PlayGameRequest): Promise<ApiResponse<GameResponse>> {
     return this.request<GameResponse>("POST", "/games/play", request);

@@ -39,6 +39,13 @@
   font-size: 0.9rem;
 }
 
+.balance-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: flex-end;
+}
+
 .wallet-address {
   background: rgba(255, 255, 255, 0.2);
   padding: 0.25rem 0.5rem;
@@ -46,9 +53,18 @@
   font-family: monospace;
 }
 
-.token-balance {
+.wallet-balance {
   background: rgba(16, 185, 129, 0.2);
   color: #4ade80;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.platform-balance {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-weight: 600;
@@ -66,7 +82,7 @@
   align-items: center;
 }
 
-.auth-button, .logout-button {
+.auth-button, .logout-button, .balance-button {
   background: #10b981;
   color: white;
   border: none;
@@ -78,8 +94,19 @@
   transition: background-color 0.2s;
 }
 
+.balance-button {
+  background: #3b82f6;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .auth-button:hover {
   background: #059669;
+}
+
+.balance-button:hover {
+  background: #2563eb;
 }
 
 .auth-button:disabled {

@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50.84% </span>
+                <span class="strong">44.06% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>30/59</span>
+                <span class='fraction'>26/59</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">30.76% </span>
+                <span class="strong">15.38% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>4/13</span>
+                <span class='fraction'>2/13</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">48.21% </span>
+                <span class="strong">41.07% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>27/56</span>
+                <span class='fraction'>23/56</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -212,48 +212,48 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">150x</span>
-<span class="cline-any cline-yes">150x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">142x</span>
-<span class="cline-any cline-yes">142x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">142x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">141x</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">141x</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">141x</span>
+<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">141x</span>
-<span class="cline-any cline-yes">141x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">139x</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">139x</span>
-<span class="cline-any cline-yes">139x</span>
-<span class="cline-any cline-yes">139x</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-yes">29x</span>
+<span class="cline-any cline-yes">29x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -355,11 +355,11 @@ export const authenticatetoken = function (req: Req, res: Response, next: any) {
     const authHeader = req.headers.authorization;
     const parts = authHeader.split(":");
 &nbsp;
-    if (parts.length !== 2) {
-      res
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (parts.length !== 2) {
+<span class="cstat-no" title="statement not covered" >      res</span>
         .status(401)
         .json({ success: false, message: "Invalid authorization format" });
-      return;
+<span class="cstat-no" title="statement not covered" >      return;</span>
     }
 &nbsp;
     const [serverKey, token] = parts;
@@ -375,9 +375,9 @@ export const authenticatetoken = function (req: Req, res: Response, next: any) {
     }
 &nbsp;
     UserModel.findByToken(token, (err: Error, user: UserDocument | null) =&gt; {
-      if (err) {
-        res.status(500).json({ success: false, message: "Database error" });
-        return;
+      <span class="missing-if-branch" title="if path not taken" >I</span>if (err) {
+<span class="cstat-no" title="statement not covered" >        res.status(500).json({ success: false, message: "Database error" });</span>
+<span class="cstat-no" title="statement not covered" >        return;</span>
       }
       <span class="missing-if-branch" title="if path not taken" >I</span>if (!user) {
 <span class="cstat-no" title="statement not covered" >        res.status(401).json({ success: false, message: "Invalid token" });</span>
@@ -466,7 +466,7 @@ export const validateRequest =
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-18T15:42:50.776Z
+                at 2025-06-25T18:18:01.553Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

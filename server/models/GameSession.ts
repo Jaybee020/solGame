@@ -46,6 +46,7 @@ export interface IGameSession extends Document {
   operationIds: string[];
   payoutProcessed: boolean;
   payoutTransactionId?: string;
+  useBalance?: boolean;
   validationChecks: {
     [key: string]: boolean;
   };
@@ -190,6 +191,10 @@ const GameSessionSchema: Schema = new Schema(
     payoutTxHash: {
       type: String,
       required: false,
+    },
+    useBalance: {
+      type: Boolean,
+      default: false,
     },
     suspiciousActivity: [
       {

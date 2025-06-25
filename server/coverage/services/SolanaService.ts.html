@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for providers/SlotsProvider.ts</title>
+    <title>Code coverage report for services/SolanaService.ts</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../prettify.css" />
     <link rel="stylesheet" href="../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../index.html">All files</a> / <a href="index.html">providers</a> SlotsProvider.ts</h1>
+        <h1><a href="../index.html">All files</a> / <a href="index.html">services</a> SolanaService.ts</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">66.66% </span>
+                <span class="strong">12.64% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>66/99</span>
+                <span class='fraction'>11/87</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">46.87% </span>
+                <span class="strong">3.12% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>15/32</span>
+                <span class='fraction'>1/32</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.23% </span>
+                <span class="strong">40% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>15/17</span>
+                <span class='fraction'>2/5</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">67.41% </span>
+                <span class="strong">12.94% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>60/89</span>
+                <span class='fraction'>11/85</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -366,415 +366,7 @@
 <a name='L301'></a><a href='#L301'>301</a>
 <a name='L302'></a><a href='#L302'>302</a>
 <a name='L303'></a><a href='#L303'>303</a>
-<a name='L304'></a><a href='#L304'>304</a>
-<a name='L305'></a><a href='#L305'>305</a>
-<a name='L306'></a><a href='#L306'>306</a>
-<a name='L307'></a><a href='#L307'>307</a>
-<a name='L308'></a><a href='#L308'>308</a>
-<a name='L309'></a><a href='#L309'>309</a>
-<a name='L310'></a><a href='#L310'>310</a>
-<a name='L311'></a><a href='#L311'>311</a>
-<a name='L312'></a><a href='#L312'>312</a>
-<a name='L313'></a><a href='#L313'>313</a>
-<a name='L314'></a><a href='#L314'>314</a>
-<a name='L315'></a><a href='#L315'>315</a>
-<a name='L316'></a><a href='#L316'>316</a>
-<a name='L317'></a><a href='#L317'>317</a>
-<a name='L318'></a><a href='#L318'>318</a>
-<a name='L319'></a><a href='#L319'>319</a>
-<a name='L320'></a><a href='#L320'>320</a>
-<a name='L321'></a><a href='#L321'>321</a>
-<a name='L322'></a><a href='#L322'>322</a>
-<a name='L323'></a><a href='#L323'>323</a>
-<a name='L324'></a><a href='#L324'>324</a>
-<a name='L325'></a><a href='#L325'>325</a>
-<a name='L326'></a><a href='#L326'>326</a>
-<a name='L327'></a><a href='#L327'>327</a>
-<a name='L328'></a><a href='#L328'>328</a>
-<a name='L329'></a><a href='#L329'>329</a>
-<a name='L330'></a><a href='#L330'>330</a>
-<a name='L331'></a><a href='#L331'>331</a>
-<a name='L332'></a><a href='#L332'>332</a>
-<a name='L333'></a><a href='#L333'>333</a>
-<a name='L334'></a><a href='#L334'>334</a>
-<a name='L335'></a><a href='#L335'>335</a>
-<a name='L336'></a><a href='#L336'>336</a>
-<a name='L337'></a><a href='#L337'>337</a>
-<a name='L338'></a><a href='#L338'>338</a>
-<a name='L339'></a><a href='#L339'>339</a>
-<a name='L340'></a><a href='#L340'>340</a>
-<a name='L341'></a><a href='#L341'>341</a>
-<a name='L342'></a><a href='#L342'>342</a>
-<a name='L343'></a><a href='#L343'>343</a>
-<a name='L344'></a><a href='#L344'>344</a>
-<a name='L345'></a><a href='#L345'>345</a>
-<a name='L346'></a><a href='#L346'>346</a>
-<a name='L347'></a><a href='#L347'>347</a>
-<a name='L348'></a><a href='#L348'>348</a>
-<a name='L349'></a><a href='#L349'>349</a>
-<a name='L350'></a><a href='#L350'>350</a>
-<a name='L351'></a><a href='#L351'>351</a>
-<a name='L352'></a><a href='#L352'>352</a>
-<a name='L353'></a><a href='#L353'>353</a>
-<a name='L354'></a><a href='#L354'>354</a>
-<a name='L355'></a><a href='#L355'>355</a>
-<a name='L356'></a><a href='#L356'>356</a>
-<a name='L357'></a><a href='#L357'>357</a>
-<a name='L358'></a><a href='#L358'>358</a>
-<a name='L359'></a><a href='#L359'>359</a>
-<a name='L360'></a><a href='#L360'>360</a>
-<a name='L361'></a><a href='#L361'>361</a>
-<a name='L362'></a><a href='#L362'>362</a>
-<a name='L363'></a><a href='#L363'>363</a>
-<a name='L364'></a><a href='#L364'>364</a>
-<a name='L365'></a><a href='#L365'>365</a>
-<a name='L366'></a><a href='#L366'>366</a>
-<a name='L367'></a><a href='#L367'>367</a>
-<a name='L368'></a><a href='#L368'>368</a>
-<a name='L369'></a><a href='#L369'>369</a>
-<a name='L370'></a><a href='#L370'>370</a>
-<a name='L371'></a><a href='#L371'>371</a>
-<a name='L372'></a><a href='#L372'>372</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">28x</span>
-<span class="cline-any cline-yes">28x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">28x</span>
-<span class="cline-any cline-yes">28x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">28x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">17x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">13x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">13x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">9x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">15x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">19x</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">8x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">7x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L304'></a><a href='#L304'>304</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -787,393 +379,597 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">34x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { BaseGameProvider } from "./BaseGameProvider";
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">32x</span>
+<span class="cline-any cline-yes">32x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">32x</span>
+<span class="cline-any cline-yes">32x</span>
+<span class="cline-any cline-yes">32x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import {
+  Connection,
+  PublicKey,
+  Transaction,
+  sendAndConfirmTransaction,
+  Keypair,
+  LAMPORTS_PER_SOL,
+} from "@solana/web3.js";
 import {
-  GameType,
-  GameConfig,
-  GameState,
-  GameResult,
-  GameMove,
-} from "../types/game";
+  TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddress,
+  createTransferInstruction,
+  createAssociatedTokenAccountInstruction,
+  TOKEN_2022_PROGRAM_ID,
+} from "@solana/spl-token";
+import { consoleLogger } from "./logger/pinoLogger";
+import { STAKING_TOKEN, MANAGER_WALLET_ADDRESS, MANAGER_KEYPAIR } from "../config/constants";
 &nbsp;
-type CryptoTheme = "BTC" | "ETH" | "SOL" | "ADA" | "MATIC";
+export class SolanaService {
+  private connection: Connection;
 &nbsp;
-interface SlotSymbol {
-  id: string;
-  name: string;
-  weight: number;
-  multipliers: { [key: number]: number };
-  isCrypto?: boolean;
-  theme?: CryptoTheme;
-}
+  constructor(rpcUrl: string) {
+    this.connection = new Connection(rpcUrl, "confirmed");
+  }
 &nbsp;
-interface SlotsGameData {
-  betAmount: number;
-  serverSeed: string;
-  clientSeed: string;
-  nonce: number;
-  paylines: number;
-  theme?: CryptoTheme;
-  hasSpun?: boolean;
-  gameStarted?: boolean;
-}
+  async verifyTokenTransfer(
+    txHash: string,
+    expectedTokenMint: string,
+    expectedRecipient: string,
+    expectedAmount: number
+  ): Promise&lt;boolean&gt;;
+  
+  async verifyTokenTransfer(
+    txHash: string,
+    userId: string
+  ): Promise&lt;{isValid: boolean, amount: number}&gt;;
+  
+  async verifyTokenTransfer(
+    txHash: string,
+    expectedTokenMintOrUserId: string,
+    expectedRecipient?: string,
+    expectedAmount?: number
+  ): Promise&lt;boolean | {isValid: boolean, amount: number}&gt; {
+    try {
+      const transaction = await this.connection.getTransaction(txHash, {
+        commitment: "confirmed",
+        maxSupportedTransactionVersion: 0,
+      });
 &nbsp;
-interface SlotsResult {
-  reels: string[][];
-  paylines: Array&lt;{ line: string[]; multiplier: number; symbolCount: number }&gt;;
-  totalMultiplier: number;
-  isWin: boolean;
-  theme?: CryptoTheme;
-}
-&nbsp;
-export class SlotsProvider extends BaseGameProvider {
-  gameType: GameType = "slots";
-  config: GameConfig = {
-    minBet: 1,
-    maxBet: 50,
-    baseMultiplier: 1,
-    houseEdge: 0.03, // Updated for 97% RTP
-  };
-&nbsp;
-  private readonly REEL_SIZE = 3;
-  private readonly NUM_REELS = 5;
-&nbsp;
-  private readonly SYMBOLS: SlotSymbol[] = [
-    // Crypto symbols matching frontend symbolData
-    {
-      id: "sol",
-      name: "Solana",
-      weight: 20,
-      multipliers: { 3: 2, 4: 4, 5: 8 },
-      isCrypto: true,
-      theme: "SOL",
-    },
-    {
-      id: "btc",
-      name: "Bitcoin",
-      weight: 10,
-      multipliers: { 3: 5, 4: 10, 5: 25 },
-      isCrypto: true,
-      theme: "BTC",
-    },
-    {
-      id: "eth",
-      name: "Ethereum",
-      weight: 15,
-      multipliers: { 3: 1.6, 4: 3.2, 5: 8 },
-      isCrypto: true,
-      theme: "ETH",
-    },
-    {
-      id: "ada",
-      name: "Cardano",
-      weight: 25,
-      multipliers: { 3: 1.2, 4: 2.4, 5: 6 },
-      isCrypto: true,
-      theme: "ADA",
-    },
-    {
-      id: "matic",
-      name: "Polygon",
-      weight: 30,
-      multipliers: { 3: 0.9, 4: 1.8, 5: 4.5 },
-      isCrypto: true,
-      theme: "MATIC",
-    },
-  ];
-&nbsp;
-  private getSymbolsForTheme(theme?: CryptoTheme): SlotSymbol[] {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (!theme) <span class="cstat-no" title="statement not covered" >return this.SYMBOLS;</span>
-&nbsp;
-    return this.SYMBOLS.map((symbol) =&gt; {
-      if (symbol.isCrypto &amp;&amp; symbol.theme !== theme) {
-        // Reduce weight of other crypto symbols
-        return { ...symbol, weight: Math.floor(symbol.weight * 0.3) };
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (!transaction) {</span>
+<span class="cstat-no" title="statement not covered" >        consoleLogger.info(`Transaction ${txHash} not found or not confirmed`);</span>
+<span class="cstat-no" title="statement not covered" >        return false;</span>
       }
-      if (symbol.isCrypto &amp;&amp; symbol.theme === theme) {
-        // Increase weight of themed crypto symbol
-        return { ...symbol, weight: Math.floor(symbol.weight * 2) };
-      }
-<span class="cstat-no" title="statement not covered" >      return symbol;</span>
-    });
-  }
 &nbsp;
-  private createWeightedPool(symbols: SlotSymbol[]): string[] {
-    const pool: string[] = [];
-    for (const symbol of symbols) {
-      for (let i = 0; i &lt; symbol.weight; i++) {
-        pool.push(symbol.id);
-      }
-    }
-    return pool;
-  }
-&nbsp;
-  private getSymbolById(id: string): SlotSymbol | undefined {
-    return this.SYMBOLS.find((symbol) =&gt; symbol.id === id);
-  }
-&nbsp;
-  initializeGame(
-    betAmount: number,
-    serverSeed: string,
-    clientSeed: string = <span class="branch-0 cbranch-no" title="branch not covered" >"",</span>
-    nonce: number = <span class="branch-0 cbranch-no" title="branch not covered" >0,</span>
-    theme?: CryptoTheme
-  ): GameState {
-    const gameData: SlotsGameData = {
-      betAmount,
-      serverSeed,
-      clientSeed,
-      nonce,
-      paylines: 25,
-      theme,
-      hasSpun: false,
-      gameStarted: false,
-    };
-&nbsp;
-    return {
-      gameType: this.gameType,
-      status: "in_progress",
-      currentData: gameData,
-      history: [],
-    };
-  }
-&nbsp;
-  async playGame(state: GameState, move?: GameMove): Promise&lt;GameResult&gt; {
-    const gameData = state.currentData as SlotsGameData;
-&nbsp;
-    // Handle initialization
-    if (!move || <span class="branch-1 cbranch-no" title="branch not covered" >move.action === 'initialize')</span> {
-      gameData.gameStarted = true;
-      
-      return {
-        isWin: false,
-        multiplier: 0,
-        winAmount: 0,
-        gameData: {
-          hasSpun: false,
-          gameStarted: true,
-          paylines: gameData.paylines,
-          theme: gameData.theme,
-        },
-        outcome: { status: 'initialized' },
-      };
-    }
-&nbsp;
-    // Handle spin action
-<span class="cstat-no" title="statement not covered" >    <span class="missing-if-branch" title="if path not taken" >I</span>if (move.action === 'spin' &amp;&amp; !gameData.hasSpun) {</span>
-<span class="cstat-no" title="statement not covered" >      return this.performSpin(gameData, state);</span>
-    }
-&nbsp;
-    // If no valid action or already spun, return current state
-<span class="cstat-no" title="statement not covered" >    return {</span>
-      isWin: false,
-      multiplier: 0,
-      winAmount: 0,
-      gameData: {
-        hasSpun: gameData.hasSpun || false,
-        gameStarted: gameData.gameStarted || false,
-      },
-      outcome: { status: 'waiting' },
-    };
-  }
-&nbsp;
-  private <span class="fstat-no" title="function not covered" >performSpin(</span>gameData: SlotsGameData, state: GameState): GameResult {
-<span class="cstat-no" title="statement not covered" >    gameData.hasSpun = true;</span>
-    
-    const symbols = <span class="cstat-no" title="statement not covered" >this.getSymbolsForTheme(gameData.theme);</span>
-    const weightedPool = <span class="cstat-no" title="statement not covered" >this.createWeightedPool(symbols);</span>
-&nbsp;
-    const randoms = <span class="cstat-no" title="statement not covered" >this.generateSecureRandoms(</span>
-      gameData.serverSeed,
-      gameData.clientSeed,
-      gameData.nonce,
-      this.NUM_REELS * this.REEL_SIZE
-    );
-&nbsp;
-    const reels: string[][] = <span class="cstat-no" title="statement not covered" >[];</span>
-    let randomIndex = <span class="cstat-no" title="statement not covered" >0;</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    for (let i = <span class="cstat-no" title="statement not covered" >0;</span> i &lt; this.NUM_REELS; i++) {</span>
-      const reel: string[] = <span class="cstat-no" title="statement not covered" >[];</span>
-<span class="cstat-no" title="statement not covered" >      for (let j = <span class="cstat-no" title="statement not covered" >0;</span> j &lt; this.REEL_SIZE; j++) {</span>
-        const poolIndex = <span class="cstat-no" title="statement not covered" >Math.floor(</span>
-          randoms[randomIndex] * weightedPool.length
+<span class="cstat-no" title="statement not covered" >      <span class="missing-if-branch" title="if path not taken" >I</span>if (</span>
+        !transaction.meta?.postTokenBalances ||
+        !transaction.meta?.preTokenBalances
+      ) {
+<span class="cstat-no" title="statement not covered" >        consoleLogger.info(</span>
+          `Transaction ${txHash} does not contain token balance information`
         );
-<span class="cstat-no" title="statement not covered" >        reel.push(weightedPool[poolIndex]);</span>
-<span class="cstat-no" title="statement not covered" >        randomIndex++;</span>
-      }
-<span class="cstat-no" title="statement not covered" >      reels.push(reel);</span>
-    }
-&nbsp;
-    const paylines = <span class="cstat-no" title="statement not covered" >this.calculatePaylines(reels);</span>
-    const totalMultiplier = <span class="cstat-no" title="statement not covered" >paylines.reduce(</span>
-<span class="fstat-no" title="function not covered" >      (s</span>um, line) =&gt; <span class="cstat-no" title="statement not covered" >sum + line.multiplier,</span>
-      0
-    );
-    const isWin = <span class="cstat-no" title="statement not covered" >totalMultiplier &gt; 0;</span>
-&nbsp;
-    const winAmount = <span class="cstat-no" title="statement not covered" >this.calculateWinnings(</span>
-      gameData.betAmount,
-      totalMultiplier
-    );
-&nbsp;
-    const result: SlotsResult = <span class="cstat-no" title="statement not covered" >{</span>
-      reels,
-      paylines,
-      totalMultiplier,
-      isWin,
-      theme: gameData.theme,
-    };
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    state.status = "completed";</span>
-<span class="cstat-no" title="statement not covered" >    state.history.push(result);</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >    return {</span>
-      isWin,
-      multiplier: totalMultiplier,
-      winAmount,
-      gameData: result,
-      outcome: { reels, totalMultiplier, isWin, theme: gameData.theme },
-    };
-  }
-&nbsp;
-  private calculatePaylines(
-    reels: string[][]
-  ): Array&lt;{ line: string[]; multiplier: number; symbolCount: number }&gt; {
-    const paylines: Array&lt;{
-      line: string[];
-      multiplier: number;
-      symbolCount: number;
-    }&gt; = [];
-&nbsp;
-    // Check horizontal paylines
-    for (let row = 0; row &lt; this.REEL_SIZE; row++) {
-      const line: string[] = [];
-      for (let reel = 0; reel &lt; this.NUM_REELS; reel++) {
-        line.push(reels[reel][row]);
+<span class="cstat-no" title="statement not covered" >        return false;</span>
       }
 &nbsp;
-      const result = this.calculateLineMultiplier(line);
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (result.multiplier &gt; 0) {
-<span class="cstat-no" title="statement not covered" >        paylines.push({</span>
-          line,
-          multiplier: result.multiplier,
-          symbolCount: result.count,
-        });
-      }
-    }
+      // Determine if this is the new balance-based verification (2 params) or old transaction-based (4 params)
+      const isBalanceVerification = <span class="cstat-no" title="statement not covered" >arguments.length === 2;</span>
+      
+<span class="cstat-no" title="statement not covered" >      if (isBalanceVerification) {</span>
+        // New balance-based verification - check for transfer to manager wallet
+        const expectedTokenMint = <span class="cstat-no" title="statement not covered" >STAKING_TOKEN.mint;</span>
+        const expectedRecipient = <span class="cstat-no" title="statement not covered" >MANAGER_WALLET_ADDRESS;</span>
+        
+<span class="cstat-no" title="statement not covered" >        for (let i = <span class="cstat-no" title="statement not covered" >0;</span> i &lt; transaction.meta.postTokenBalances.length; i++) {</span>
+          const postBalance = <span class="cstat-no" title="statement not covered" >transaction.meta.postTokenBalances[i];</span>
+          const preBalance = <span class="cstat-no" title="statement not covered" >transaction.meta.preTokenBalances.find(</span>
+<span class="fstat-no" title="function not covered" >            (b</span>alance) =&gt; <span class="cstat-no" title="statement not covered" >balance.accountIndex === postBalance.accountIndex</span>
+          );
 &nbsp;
-    // Check diagonal paylines (top-left to bottom-right and top-right to bottom-left)
-    if (this.REEL_SIZE &gt;= 3) {
-      const diagonalLine1: string[] = [];
-      const diagonalLine2: string[] = [];
+<span class="cstat-no" title="statement not covered" >          <span class="missing-if-branch" title="if path not taken" >I</span>if (</span>
+            postBalance?.mint === expectedTokenMint &amp;&amp;
+            postBalance?.owner === expectedRecipient
+          ) {
+            const balanceChange =
+<span class="cstat-no" title="statement not covered" >              (postBalance.uiTokenAmount?.uiAmount || 0) -</span>
+              (preBalance?.uiTokenAmount?.uiAmount || 0);
 &nbsp;
-      for (let i = 0; i &lt; Math.min(this.NUM_REELS, this.REEL_SIZE); i++) {
-        diagonalLine1.push(reels[i][i]);
-        diagonalLine2.push(reels[i][this.REEL_SIZE - 1 - i]);
-      }
+<span class="cstat-no" title="statement not covered" >            <span class="missing-if-branch" title="if path not taken" >I</span>if (balanceChange &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >              consoleLogger.info(</span>
+                `Token transfer verified: ${balanceChange} tokens deposited to manager wallet`
+              );
+<span class="cstat-no" title="statement not covered" >              return { isValid: true, amount: balanceChange };</span>
+            }
+          }
+        }
 &nbsp;
-      const diagonal1Result = this.calculateLineMultiplier(diagonalLine1);
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (diagonal1Result.multiplier &gt; 0) {
-<span class="cstat-no" title="statement not covered" >        paylines.push({</span>
-          line: diagonalLine1,
-          multiplier: diagonal1Result.multiplier,
-          symbolCount: diagonal1Result.count,
-        });
-      }
-&nbsp;
-      const diagonal2Result = this.calculateLineMultiplier(diagonalLine2);
-      <span class="missing-if-branch" title="if path not taken" >I</span>if (diagonal2Result.multiplier &gt; 0) {
-<span class="cstat-no" title="statement not covered" >        paylines.push({</span>
-          line: diagonalLine2,
-          multiplier: diagonal2Result.multiplier,
-          symbolCount: diagonal2Result.count,
-        });
-      }
-    }
-&nbsp;
-    return paylines;
-  }
-&nbsp;
-  private calculateLineMultiplier(line: string[]): {
-    multiplier: number;
-    count: number;
-  } {
-    <span class="missing-if-branch" title="if path not taken" >I</span>if (line.length &lt; 3) <span class="cstat-no" title="statement not covered" >return { multiplier: 0, count: 0 };</span>
-&nbsp;
-    const firstSymbol = line[0];
-    let consecutiveCount = 1;
-&nbsp;
-    for (let i = 1; i &lt; line.length; i++) {
-      if (line[i] === firstSymbol) {
-        consecutiveCount++;
+<span class="cstat-no" title="statement not covered" >        consoleLogger.info(</span>
+          `Token transfer verification failed for transaction ${txHash} - no valid deposit found`
+        );
+<span class="cstat-no" title="statement not covered" >        return { isValid: false, amount: 0 };</span>
       } else {
-        break;
+        // Old transaction-based verification
+        const expectedTokenMint = <span class="cstat-no" title="statement not covered" >expectedTokenMintOrUserId;</span>
+        
+<span class="cstat-no" title="statement not covered" >        for (let i = <span class="cstat-no" title="statement not covered" >0;</span> i &lt; transaction.meta.postTokenBalances.length; i++) {</span>
+          const postBalance = <span class="cstat-no" title="statement not covered" >transaction.meta.postTokenBalances[i];</span>
+          const preBalance = <span class="cstat-no" title="statement not covered" >transaction.meta.preTokenBalances.find(</span>
+<span class="fstat-no" title="function not covered" >            (b</span>alance) =&gt; <span class="cstat-no" title="statement not covered" >balance.accountIndex === postBalance.accountIndex</span>
+          );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          <span class="missing-if-branch" title="if path not taken" >I</span>if (</span>
+            postBalance?.mint === expectedTokenMint &amp;&amp;
+            postBalance?.owner === expectedRecipient
+          ) {
+            const balanceChange =
+<span class="cstat-no" title="statement not covered" >              (postBalance.uiTokenAmount?.uiAmount || 0) -</span>
+              (preBalance?.uiTokenAmount?.uiAmount || 0);
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            <span class="missing-if-branch" title="if path not taken" >I</span>if (balanceChange &gt;= expectedAmount!) {</span>
+<span class="cstat-no" title="statement not covered" >              consoleLogger.info(</span>
+                `Token transfer verified: ${balanceChange} tokens sent to ${expectedRecipient}`
+              );
+<span class="cstat-no" title="statement not covered" >              return true;</span>
+            }
+          }
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        consoleLogger.info(</span>
+          `Token transfer verification failed for transaction ${txHash}`
+        );
+<span class="cstat-no" title="statement not covered" >        return false;</span>
       }
+    } catch (error) {
+      consoleLogger.error(`Error verifying token transfer: ${error}`);
+      const isBalanceVerification = arguments.length === 2;
+      return isBalanceVerification ? <span class="branch-0 cbranch-no" title="branch not covered" >{ isValid: false, amount: 0 } </span>: false;
     }
+  }
 &nbsp;
-    // No fruit combination logic needed with crypto-only symbols
+  async initiateTokenPayout(
+    amount: number,
+    recipientAddress: string,
+    tokenMintAddress: string,
+    payerKeypair: Keypair
+  ): Promise&lt;string | null&gt;;
+  
+  async initiateTokenPayout(
+    recipientAddress: string,
+    amount: number,
+    userId: string
+  ): Promise&lt;{success: boolean, transactionHash?: string, error?: string}&gt;;
+  
+<span class="fstat-no" title="function not covered" >  async </span>initiateTokenPayout(
+    amountOrRecipient: number | string,
+    recipientOrAmount: string | number,
+    tokenMintOrUserId: string,
+    payerKeypair?: Keypair
+  ): Promise&lt;string | null | {success: boolean, transactionHash?: string, error?: string}&gt; {
+<span class="cstat-no" title="statement not covered" >    try {</span>
+      // Determine if this is the new balance-based payout (3 params) or old transaction-based (4 params)
+      const isBalancePayout = <span class="cstat-no" title="statement not covered" >arguments.length === 3;</span>
+      
+<span class="cstat-no" title="statement not covered" >      if (isBalancePayout) {</span>
+        // New balance-based payout
+        const recipientAddress = <span class="cstat-no" title="statement not covered" >amountOrRecipient as string;</span>
+        const amount = <span class="cstat-no" title="statement not covered" >recipientOrAmount as number;</span>
+        const userId = <span class="cstat-no" title="statement not covered" >tokenMintOrUserId;</span>
+        
+        const tokenMint = <span class="cstat-no" title="statement not covered" >new PublicKey(STAKING_TOKEN.mint);</span>
+        const recipient = <span class="cstat-no" title="statement not covered" >new PublicKey(recipientAddress);</span>
+        const payer = <span class="cstat-no" title="statement not covered" >MANAGER_KEYPAIR.publicKey;</span>
+        
+        const payerTokenAccount = <span class="cstat-no" title="statement not covered" >await getAssociatedTokenAddress(</span>
+          tokenMint,
+          payer,
+          undefined,
+          TOKEN_2022_PROGRAM_ID
+        );
 &nbsp;
-    if (consecutiveCount &gt;= 3) {
-      const symbol = this.getSymbolById(firstSymbol);
-      if (symbol &amp;&amp; symbol.multipliers[consecutiveCount]) {
-        return {
-          multiplier: symbol.multipliers[consecutiveCount],
-          count: consecutiveCount,
+        const recipientTokenAccount = <span class="cstat-no" title="statement not covered" >await getAssociatedTokenAddress(</span>
+          tokenMint,
+          recipient,
+          undefined,
+          TOKEN_2022_PROGRAM_ID
+        );
+&nbsp;
+        const tokenAccountInfo = <span class="cstat-no" title="statement not covered" >await this.connection.getAccountInfo(</span>
+          recipientTokenAccount
+        );
+&nbsp;
+        const transaction = <span class="cstat-no" title="statement not covered" >new Transaction();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        <span class="missing-if-branch" title="if path not taken" >I</span>if (!tokenAccountInfo) {</span>
+<span class="cstat-no" title="statement not covered" >          transaction.add(</span>
+            createAssociatedTokenAccountInstruction(
+              payer,
+              recipientTokenAccount,
+              recipient,
+              tokenMint,
+              TOKEN_2022_PROGRAM_ID
+            )
+          );
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        transaction.add(</span>
+          createTransferInstruction(
+            payerTokenAccount,
+            recipientTokenAccount,
+            payer,
+            amount * Math.pow(10, STAKING_TOKEN.decimals),
+            [],
+            TOKEN_2022_PROGRAM_ID
+          )
+        );
+&nbsp;
+        const signature = <span class="cstat-no" title="statement not covered" >await sendAndConfirmTransaction(</span>
+          this.connection,
+          transaction,
+          [MANAGER_KEYPAIR],
+          { commitment: "confirmed" }
+        );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        consoleLogger.info(`Token payout completed: ${signature}`);</span>
+<span class="cstat-no" title="statement not covered" >        return {</span>
+          success: true,
+          transactionHash: signature
         };
+      } else {
+        // Old transaction-based payout
+        const amount = <span class="cstat-no" title="statement not covered" >amountOrRecipient as number;</span>
+        const recipientAddress = <span class="cstat-no" title="statement not covered" >recipientOrAmount as string;</span>
+        const tokenMintAddress = <span class="cstat-no" title="statement not covered" >tokenMintOrUserId;</span>
+        const payerKeypair = <span class="cstat-no" title="statement not covered" >arguments[3] as Keypair;</span>
+        
+        const tokenMint = <span class="cstat-no" title="statement not covered" >new PublicKey(tokenMintAddress);</span>
+        const recipient = <span class="cstat-no" title="statement not covered" >new PublicKey(recipientAddress);</span>
+        const payer = <span class="cstat-no" title="statement not covered" >payerKeypair!.publicKey;</span>
+&nbsp;
+        const payerTokenAccount = <span class="cstat-no" title="statement not covered" >await getAssociatedTokenAddress(</span>
+          tokenMint,
+          payer,
+          undefined,
+          TOKEN_2022_PROGRAM_ID
+        );
+&nbsp;
+        const recipientTokenAccount = <span class="cstat-no" title="statement not covered" >await getAssociatedTokenAddress(</span>
+          tokenMint,
+          recipient,
+          undefined,
+          TOKEN_2022_PROGRAM_ID
+        );
+&nbsp;
+        const tokenAccountInfo = <span class="cstat-no" title="statement not covered" >await this.connection.getAccountInfo(</span>
+          recipientTokenAccount
+        );
+&nbsp;
+        const transaction = <span class="cstat-no" title="statement not covered" >new Transaction();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        <span class="missing-if-branch" title="if path not taken" >I</span>if (!tokenAccountInfo) {</span>
+<span class="cstat-no" title="statement not covered" >          transaction.add(</span>
+            createAssociatedTokenAccountInstruction(
+              payer,
+              recipientTokenAccount,
+              recipient,
+              tokenMint,
+              TOKEN_2022_PROGRAM_ID
+            )
+          );
+        }
+&nbsp;
+        const transferInstruction = <span class="cstat-no" title="statement not covered" >createTransferInstruction(</span>
+          payerTokenAccount,
+          recipientTokenAccount,
+          payer,
+          amount,
+          undefined,
+          TOKEN_2022_PROGRAM_ID
+        );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        transaction.add(transferInstruction);</span>
+&nbsp;
+        const signature = <span class="cstat-no" title="statement not covered" >await sendAndConfirmTransaction(</span>
+          this.connection,
+          transaction,
+          [payerKeypair!],
+          { commitment: "confirmed" }
+        );
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        consoleLogger.info(</span>
+          `Token payout successful. Transaction signature: ${signature}`
+        );
+<span class="cstat-no" title="statement not covered" >        return signature;</span>
       }
+    } catch (error) {
+<span class="cstat-no" title="statement not covered" >      console.log(error);</span>
+<span class="cstat-no" title="statement not covered" >      consoleLogger.error(`Error initiating token payout: ${error}`);</span>
+      const isBalancePayout = <span class="cstat-no" title="statement not covered" >arguments.length === 3;</span>
+<span class="cstat-no" title="statement not covered" >      return isBalancePayout ? {</span>
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      } : null;
     }
-&nbsp;
-    return { multiplier: 0, count: 0 };
-  }
-&nbsp;
-  // Public method to support themed games
-  initializeThemedGame(
-    betAmount: number,
-    serverSeed: string,
-    theme: CryptoTheme,
-    clientSeed: string = <span class="branch-0 cbranch-no" title="branch not covered" >"",</span>
-    nonce: number = <span class="branch-0 cbranch-no" title="branch not covered" >0</span>
-  ): GameState {
-    return this.initializeGame(betAmount, serverSeed, clientSeed, nonce, theme);
-  }
-&nbsp;
-  // Method to get available themes
-  getAvailableThemes(): CryptoTheme[] {
-    return ["BTC", "ETH", "SOL", "ADA", "MATIC"];
-  }
-&nbsp;
-  // Method to get symbol information for a theme
-  getThemeSymbols(theme?: CryptoTheme): SlotSymbol[] {
-    return this.getSymbolsForTheme(theme);
-  }
-&nbsp;
-  // Calculate theoretical RTP
-  calculateTheoreticalRTP(): number {
-    return (1 - this.config.houseEdge) * 100;
-  }
-&nbsp;
-  // Get all available symbols
-  getAllSymbols(): SlotSymbol[] {
-    return this.SYMBOLS;
   }
 }
 &nbsp;</pre></td></tr></table></pre>

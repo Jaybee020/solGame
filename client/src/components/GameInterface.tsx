@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useWallet } from '@solana/wallet-adapter-react';
-import { useGame } from '../hooks/useGame';
-import { useSupportedGames } from '../hooks/useSupportedGames';
-import BlackjackGame from './games/BlackjackGame';
-import DiceGame from './games/DiceGame';
-import SlotsGame from './games/SlotsGame';
-import ShipCaptainCrewGame from './games/ShipCaptainCrewGame';
-import { STAKING_TOKEN, PAYOUT_TOKEN, MANAGER_WALLET_ADDRESS } from '../config/tokens';
-import { solanaService } from '../services/solanaService';
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useGame } from "../hooks/useGame";
+import { useSupportedGames } from "../hooks/useSupportedGames";
+import BlackjackGame from "./games/BlackjackGame";
+import DiceGame from "./games/DiceGame";
+import SlotsGame from "./games/SlotsGame";
+import ShipCaptainCrewGame from "./games/ShipCaptainCrewGame";
+import {
+  STAKING_TOKEN,
+  PAYOUT_TOKEN,
+  MANAGER_WALLET_ADDRESS,
+} from "../config/tokens";
+import { solanaService } from "../services/solanaService";
+import { useBalance } from "../hooks/useBalance";
+import BalanceDisplay from "./BalanceDisplay";
 
 interface GameInterfaceProps {
   gameType: string;
@@ -16,7 +22,13 @@ interface GameInterfaceProps {
   isWalletConnected: boolean;
 }
 
-type DepositStatus = 'idle' | 'depositing' | 'confirming' | 'confirmed' | 'failed';
+type DepositStatus =
+  | "idle"
+  | "depositing"
+  | "confirming"
+  | "confirmed"
+  | "failed";
+type PaymentMethod = "balance" | "transaction";
 
 const GameInterface: React.FC<GameInterfaceProps> = ({
   gameType,
@@ -26,38 +38,102 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
   const wallet = useWallet();
   const { gameState, createGame, playMove, autoPlay, resetGame } = useGame();
   const { getGameConfig, isLoading: isLoadingGames } = useSupportedGames();
+  const { balance, hasBalance, formatBalance, refreshBalance } = useBalance();
   const [betAmount, setBetAmount] = useState(1);
   const [showResult, setShowResult] = useState(false);
-  const [depositStatus, setDepositStatus] = useState<DepositStatus>('idle');
+  const [depositStatus, setDepositStatus] = useState<DepositStatus>("idle");
   const [depositTxHash, setDepositTxHash] = useState<string | null>(null);
   const [depositError, setDepositError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("balance");
+  const [balanceRefreshTrigger, setBalanceRefreshTrigger] = useState(0);
 
   const gameConfig = getGameConfig(gameType);
 
   useEffect(() => {
-    if (gameState.status === 'completed' && gameState.result) {
+    if (gameState.status === "completed" && gameState.result) {
       setShowResult(true);
+      // Refresh balance when game completes (for both win/loss)
+      setBalanceRefreshTrigger((prev) => prev + 1);
     }
   }, [gameState.status, gameState.result]);
 
-  const handleDepositAndStartGame = async () => {
+  const handleStartGameWithBalance = async () => {
     if (!isWalletConnected || !wallet.publicKey) {
-      alert('Please connect your wallet first');
+      alert("Please connect your wallet first");
       return;
     }
 
     if (!gameConfig) {
-      alert('Game configuration not found');
+      alert("Game configuration not found");
       return;
     }
 
-    if (betAmount < gameConfig.config.minBet || betAmount > gameConfig.config.maxBet) {
-      alert(`Bet amount must be between $${gameConfig.config.minBet} and $${gameConfig.config.maxBet}`);
+    if (
+      betAmount < gameConfig.config.minBet ||
+      betAmount > gameConfig.config.maxBet
+    ) {
+      alert(
+        `Bet amount must be between $${gameConfig.config.minBet} and $${gameConfig.config.maxBet}`
+      );
+      return;
+    }
+
+    // Convert bet amount to lamports for balance check
+    const betAmountLamports = Math.floor(betAmount);
+
+    if (!hasBalance(betAmountLamports)) {
+      alert("Insufficient balance. Please deposit tokens first.");
       return;
     }
 
     try {
-      setDepositStatus('depositing');
+      setDepositStatus("depositing");
+      setDepositError(null);
+
+      // Create game using balance deduction
+      const success = await createGame({
+        gameType,
+        betAmount,
+        // No depositTxHash - this triggers balance-based flow
+      });
+
+      if (success) {
+        // Refresh balance after successful game creation
+        setBalanceRefreshTrigger((prev) => prev + 1);
+        setDepositStatus("idle");
+      } else {
+        throw new Error("Failed to create game");
+      }
+    } catch (error: any) {
+      console.error("Error creating game with balance:", error);
+      setDepositError(error.message || "Failed to create game");
+      setDepositStatus("failed");
+    }
+  };
+
+  const handleDepositAndStartGame = async () => {
+    if (!isWalletConnected || !wallet.publicKey) {
+      alert("Please connect your wallet first");
+      return;
+    }
+
+    if (!gameConfig) {
+      alert("Game configuration not found");
+      return;
+    }
+
+    if (
+      betAmount < gameConfig.config.minBet ||
+      betAmount > gameConfig.config.maxBet
+    ) {
+      alert(
+        `Bet amount must be between $${gameConfig.config.minBet} and $${gameConfig.config.maxBet}`
+      );
+      return;
+    }
+
+    try {
+      setDepositStatus("depositing");
       setDepositError(null);
 
       // Step 1: Transfer tokens to manager wallet
@@ -70,20 +146,23 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
       );
 
       if (!signature) {
-        throw new Error('Failed to send deposit transaction');
+        throw new Error("Failed to send deposit transaction");
       }
 
       setDepositTxHash(signature);
-      setDepositStatus('confirming');
+      setDepositStatus("confirming");
 
       // Step 2: Wait for confirmation
-      const confirmed = await solanaService.waitForConfirmation(signature, 30000);
-      
+      const confirmed = await solanaService.waitForConfirmation(
+        signature,
+        30000
+      );
+
       if (!confirmed) {
-        throw new Error('Transaction confirmation timeout');
+        throw new Error("Transaction confirmation timeout");
       }
 
-      setDepositStatus('confirmed');
+      setDepositStatus("confirmed");
 
       // Step 3: Create game with deposit transaction hash
       const success = await createGame({
@@ -93,24 +172,23 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
       });
 
       if (!success) {
-        throw new Error('Failed to create game after deposit');
+        throw new Error("Failed to create game after deposit");
       }
 
       // Reset deposit status after successful game creation
-      setDepositStatus('idle');
+      setDepositStatus("idle");
       setDepositTxHash(null);
-
     } catch (error: any) {
-      console.error('Deposit and game creation error:', error);
-      setDepositStatus('failed');
-      setDepositError(error.message || 'Unknown error occurred');
+      console.error("Deposit and game creation error:", error);
+      setDepositStatus("failed");
+      setDepositError(error.message || "Unknown error occurred");
     }
   };
 
   const handleNewGame = () => {
     resetGame();
     setShowResult(false);
-    setDepositStatus('idle');
+    setDepositStatus("idle");
     setDepositTxHash(null);
     setDepositError(null);
   };
@@ -125,13 +203,13 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
     };
 
     switch (gameType) {
-      case 'blackjack':
+      case "blackjack":
         return <BlackjackGame {...commonProps} />;
-      case 'dice':
+      case "dice":
         return <DiceGame {...commonProps} />;
-      case 'slots':
+      case "slots":
         return <SlotsGame {...commonProps} />;
-      case 'shipcaptaincrew':
+      case "shipcaptaincrew":
         return <ShipCaptainCrewGame {...commonProps} />;
       default:
         return (
@@ -199,32 +277,48 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
               onClick={onBackToLobby}
               className="btn-ghost p-2 rounded-lg"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-text-primary capitalize">
-                {gameType.replace('shipcaptaincrew', 'Ship Captain Crew')}
+                {gameType.replace("shipcaptaincrew", "Ship Captain Crew")}
               </h1>
               <p className="text-text-secondary">
-                Min: {gameConfig.config.minBet} ${STAKING_TOKEN.symbol} | Max: {gameConfig.config.maxBet} ${STAKING_TOKEN.symbol} | House Edge: {(gameConfig.config.houseEdge * 100).toFixed(1)}%
+                Min: {gameConfig.config.minBet} ${STAKING_TOKEN.symbol} | Max:{" "}
+                {gameConfig.config.maxBet} ${STAKING_TOKEN.symbol} | House Edge:{" "}
+                {(gameConfig.config.houseEdge * 100).toFixed(1)}%
               </p>
             </div>
           </div>
 
           {/* Wallet Status */}
           <div className="hidden md:flex items-center space-x-2">
-            <div className={`w-3 h-3 rounded-full ${isWalletConnected ? 'bg-primary' : 'bg-error'}`} />
+            <div
+              className={`w-3 h-3 rounded-full ${
+                isWalletConnected ? "bg-primary" : "bg-error"
+              }`}
+            />
             <span className="text-sm text-text-secondary">
-              {isWalletConnected ? 'Wallet Connected' : 'Wallet Disconnected'}
+              {isWalletConnected ? "Wallet Connected" : "Wallet Disconnected"}
             </span>
           </div>
         </motion.div>
 
         {/* Game Content */}
         <AnimatePresence mode="wait">
-          {gameState.status === 'idle' ? (
+          {gameState.status === "idle" ? (
             <motion.div
               key="setup"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -242,7 +336,11 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                 </label>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => setBetAmount(Math.max(gameConfig.config.minBet, betAmount - 1))}
+                    onClick={() =>
+                      setBetAmount(
+                        Math.max(gameConfig.config.minBet, betAmount - 1)
+                      )
+                    }
                     className="btn-secondary px-3 py-2"
                     disabled={betAmount <= gameConfig.config.minBet}
                   >
@@ -251,14 +349,29 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                   <input
                     type="number"
                     value={betAmount}
-                    onChange={(e) => setBetAmount(Math.max(gameConfig.config.minBet, Math.min(gameConfig.config.maxBet, parseFloat(e.target.value) || gameConfig.config.minBet)))}
+                    onChange={(e) =>
+                      setBetAmount(
+                        Math.max(
+                          gameConfig.config.minBet,
+                          Math.min(
+                            gameConfig.config.maxBet,
+                            parseFloat(e.target.value) ||
+                              gameConfig.config.minBet
+                          )
+                        )
+                      )
+                    }
                     className="input-field flex-1 text-center"
                     min={gameConfig.config.minBet}
                     max={gameConfig.config.maxBet}
                     step="0.01"
                   />
                   <button
-                    onClick={() => setBetAmount(Math.min(gameConfig.config.maxBet, betAmount + 1))}
+                    onClick={() =>
+                      setBetAmount(
+                        Math.min(gameConfig.config.maxBet, betAmount + 1)
+                      )
+                    }
                     className="btn-secondary px-3 py-2"
                     disabled={betAmount >= gameConfig.config.maxBet}
                   >
@@ -275,35 +388,106 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-text-secondary">Potential Win:</span>
                   <span className="text-primary font-semibold">
-                    {(betAmount * gameConfig.config.baseMultiplier).toFixed(2)} ${PAYOUT_TOKEN.symbol}
+                    {(betAmount * gameConfig.config.baseMultiplier).toFixed(2)}{" "}
+                    ${PAYOUT_TOKEN.symbol}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">Base Multiplier:</span>
-                  <span className="text-text-primary">{gameConfig.config.baseMultiplier}x</span>
+                  <span className="text-text-primary">
+                    {gameConfig.config.baseMultiplier}x
+                  </span>
                 </div>
               </div>
 
+              {/* Balance Display */}
+              <div className="mb-6">
+                <BalanceDisplay
+                  refreshTrigger={balanceRefreshTrigger}
+                  className="mb-4"
+                />
+              </div>
+
+              {/* Payment Method Selection */}
+              <div className="mb-6">
+                <label className="block text-text-secondary text-sm mb-3">
+                  Payment Method
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setPaymentMethod("balance")}
+                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                      paymentMethod === "balance"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-background-tertiary bg-background-tertiary text-text-secondary hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className="text-lg mb-1">💰</div>
+                      <div className="font-semibold text-sm">Use Balance</div>
+                      <div className="text-xs opacity-75">Instant play</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setPaymentMethod("transaction")}
+                    className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                      paymentMethod === "transaction"
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-background-tertiary bg-background-tertiary text-text-secondary hover:border-primary/50"
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className="text-lg mb-1">🔗</div>
+                      <div className="font-semibold text-sm">
+                        Send Transaction
+                      </div>
+                      <div className="text-xs opacity-75">Direct payment</div>
+                    </div>
+                  </button>
+                </div>
+
+                {/* Balance warning for insufficient funds */}
+                {paymentMethod === "balance" &&
+                  balance &&
+                  !hasBalance(Math.floor(betAmount)) && (
+                    <div className="mt-3 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+                      <div className="flex items-center gap-2 text-warning text-sm">
+                        <span>⚠️</span>
+                        <span>
+                          Insufficient balance. Need {betAmount} CASH, have{" "}
+                          {formatBalance(balance.balance)} CASH.
+                        </span>
+                      </div>
+                    </div>
+                  )}
+              </div>
+
               {/* Deposit Status Display */}
-              {depositStatus !== 'idle' && (
+              {depositStatus !== "idle" && (
                 <div className="mb-4 p-4 bg-background-tertiary rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-text-secondary">Deposit Status:</span>
-                    <span className={`font-semibold ${
-                      depositStatus === 'confirmed' ? 'text-primary' : 
-                      depositStatus === 'failed' ? 'text-error' : 'text-warning'
-                    }`}>
-                      {depositStatus === 'depositing' && 'Sending Deposit...'}
-                      {depositStatus === 'confirming' && 'Confirming Transaction...'}
-                      {depositStatus === 'confirmed' && 'Deposit Confirmed ✓'}
-                      {depositStatus === 'failed' && 'Deposit Failed ✗'}
+                    <span
+                      className={`font-semibold ${
+                        depositStatus === "confirmed"
+                          ? "text-primary"
+                          : depositStatus === "failed"
+                          ? "text-error"
+                          : "text-warning"
+                      }`}
+                    >
+                      {depositStatus === "depositing" && "Sending Deposit..."}
+                      {depositStatus === "confirming" &&
+                        "Confirming Transaction..."}
+                      {depositStatus === "confirmed" && "Deposit Confirmed ✓"}
+                      {depositStatus === "failed" && "Deposit Failed ✗"}
                     </span>
                   </div>
-                  
+
                   {depositTxHash && (
                     <div className="text-xs">
                       <span className="text-text-secondary">Transaction: </span>
-                      <a 
+                      <a
                         href={`https://explorer.solana.com/tx/${depositTxHash}?cluster=devnet`}
                         target="_blank"
                         rel="noopener noreferrer"
@@ -313,7 +497,7 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                       </a>
                     </div>
                   )}
-                  
+
                   {depositError && (
                     <div className="text-error text-sm mt-2">
                       {depositError}
@@ -323,12 +507,30 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
               )}
 
               <button
-                onClick={handleDepositAndStartGame}
-                disabled={!isWalletConnected || gameState.isLoading || depositStatus === 'depositing' || depositStatus === 'confirming'}
+                onClick={
+                  paymentMethod === "balance"
+                    ? handleStartGameWithBalance
+                    : handleDepositAndStartGame
+                }
+                disabled={
+                  !isWalletConnected ||
+                  gameState.isLoading ||
+                  depositStatus === "depositing" ||
+                  depositStatus === "confirming" ||
+                  (paymentMethod === "balance" &&
+                    balance &&
+                    !hasBalance(Math.floor(betAmount)))
+                }
                 className={`w-full py-3 font-semibold rounded-lg transition-all duration-200 ${
-                  !isWalletConnected || gameState.isLoading || depositStatus === 'depositing' || depositStatus === 'confirming'
-                    ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                    : 'btn-primary hover:shadow-glow'
+                  !isWalletConnected ||
+                  gameState.isLoading ||
+                  depositStatus === "depositing" ||
+                  depositStatus === "confirming" ||
+                  (paymentMethod === "balance" &&
+                    balance &&
+                    !hasBalance(Math.floor(betAmount)))
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "btn-primary hover:shadow-glow"
                 }`}
               >
                 {gameState.isLoading ? (
@@ -336,22 +538,24 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                     <div className="loading-spinner w-5 h-5" />
                     <span>Creating Game...</span>
                   </div>
-                ) : depositStatus === 'depositing' ? (
+                ) : depositStatus === "depositing" ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="loading-spinner w-5 h-5" />
                     <span>Sending Deposit...</span>
                   </div>
-                ) : depositStatus === 'confirming' ? (
+                ) : depositStatus === "confirming" ? (
                   <div className="flex items-center justify-center space-x-2">
                     <div className="loading-spinner w-5 h-5" />
                     <span>Confirming Transaction...</span>
                   </div>
                 ) : !isWalletConnected ? (
-                  'Connect Wallet to Play'
-                ) : depositStatus === 'failed' ? (
-                  'Retry Deposit & Start Game'
+                  "Connect Wallet to Play"
+                ) : depositStatus === "failed" ? (
+                  "Retry Deposit & Start Game"
                 ) : (
-                  `Deposit ${betAmount.toFixed(2)} ${STAKING_TOKEN.symbol} & Start Game`
+                  `Deposit ${betAmount.toFixed(2)} ${
+                    STAKING_TOKEN.symbol
+                  } & Start Game`
                 )}
               </button>
             </motion.div>
@@ -385,33 +589,51 @@ const GameInterface: React.FC<GameInterfaceProps> = ({
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="text-center">
-                  <div className={`text-6xl mb-4 ${gameState.result.isWin ? 'text-primary' : 'text-error'}`}>
-                    {gameState.result.isWin ? '🎉' : '😔'}
+                  <div
+                    className={`text-6xl mb-4 ${
+                      gameState.result.isWin ? "text-primary" : "text-error"
+                    }`}
+                  >
+                    {gameState.result.isWin ? "🎉" : "😔"}
                   </div>
-                  
-                  <h3 className={`text-2xl font-bold mb-2 ${gameState.result.isWin ? 'text-primary' : 'text-error'}`}>
-                    {gameState.result.isWin ? 'You Won!' : 'Better Luck Next Time'}
+
+                  <h3
+                    className={`text-2xl font-bold mb-2 ${
+                      gameState.result.isWin ? "text-primary" : "text-error"
+                    }`}
+                  >
+                    {gameState.result.isWin
+                      ? "You Won!"
+                      : "Better Luck Next Time"}
                   </h3>
-                  
+
                   <div className="space-y-2 mb-6">
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Bet Amount:</span>
-                      <span className="text-text-primary">${betAmount.toFixed(2)}</span>
+                      <span className="text-text-primary">
+                        ${betAmount.toFixed(2)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Multiplier:</span>
-                      <span className="text-text-primary">{gameState.result.multiplier}x</span>
+                      <span className="text-text-primary">
+                        {gameState.result.multiplier}x
+                      </span>
                     </div>
                     <div className="flex justify-between font-semibold">
                       <span className="text-text-secondary">
-                        {gameState.result.isWin ? 'Winnings:' : 'Loss:'}
+                        {gameState.result.isWin ? "Winnings:" : "Loss:"}
                       </span>
-                      <span className={gameState.result.isWin ? 'text-primary' : 'text-error'}>
+                      <span
+                        className={
+                          gameState.result.isWin ? "text-primary" : "text-error"
+                        }
+                      >
                         ${gameState.result.winAmount.toFixed(2)}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex space-x-3">
                     <button
                       onClick={() => setShowResult(false)}

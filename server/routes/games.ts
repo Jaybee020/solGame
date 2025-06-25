@@ -79,15 +79,19 @@ gameRouter.get("/supported", async (req: Req, res: Response): Promise<void> => {
  *                 type: string
  *               deviceFingerprint:
  *                 type: string
- *     description: Create a new game session
+ *               depositTxHash:
+ *                 type: string
+ *                 description: Optional - if provided, uses transaction verification; if omitted, uses balance deduction
+ *     description: Create a new game session (supports both transaction-based and balance-based flows)
  *     responses:
  *       201:
  *         description: Game session created successfully
  *       400:
- *         description: Invalid request or bet amount
+ *         description: Invalid request, insufficient balance, or bet amount
  *       422:
  *         description: Validation error
  */
+
 gameRouter.post(
   "/create",
   authenticatetoken,
@@ -108,7 +112,7 @@ gameRouter.post(
         betAmount: Joi.number().positive().required(),
         clientSeed: Joi.string().optional(),
         deviceFingerprint: Joi.string().optional(),
-        depositTxHash: Joi.string().required(),
+        depositTxHash: Joi.string().optional(), // Optional - if provided, use transaction flow; if not, use balance flow
       });
 
       const { error } = schema.validate({
@@ -149,12 +153,24 @@ gameRouter.post(
         userAgent: req.get("User-Agent"),
       };
 
-      const gameResponse = await GameEngine.createGame(
-        userId,
-        createGameRequest,
-        depositTxHash,
-        clientInfo
-      );
+      let gameResponse;
+      
+      if (depositTxHash) {
+        // Use traditional transaction-based flow
+        gameResponse = await GameEngine.createGame(
+          userId,
+          createGameRequest,
+          depositTxHash,
+          clientInfo
+        );
+      } else {
+        // Use new balance-based flow
+        gameResponse = await GameEngine.createGameWithBalance(
+          userId,
+          createGameRequest,
+          clientInfo
+        );
+      }
 
       res.status(201).json({
         success: true,

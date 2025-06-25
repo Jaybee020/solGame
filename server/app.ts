@@ -15,6 +15,7 @@ import { json, urlencoded } from "body-parser";
 import { consoleLogger } from "./services/logger/pinoLogger";
 import authRouter from "./routes/auth";
 import gameRouter from "./routes/games";
+import balanceRouter from "./routes/balance";
 import { payOutWorker } from "./jobs/payoutQueue";
 
 const PORT = process.env.PORT || 8000;
@@ -44,6 +45,7 @@ async function Mainrun() {
     app.use(cookieParser());
     app.use("/auth", authRouter);
     app.use("/games", gameRouter);
+    app.use("/balance", balanceRouter);
     payOutWorker.start();
     //@ts-ignore
     httpServer.listen(PORT, "0.0.0.0", async (error) => {

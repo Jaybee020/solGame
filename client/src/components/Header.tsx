@@ -14,8 +14,14 @@ import bs58 from "bs58";
 import "./Header.css";
 import gameApi from "../services/gameApi";
 import { useTokenBalance } from "../hooks/useTokenBalance";
+import { balanceApi } from "../services/balanceApi";
+import { useBalance } from "../hooks/useBalance";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onNavigateToBalance?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onNavigateToBalance }) => {
   const { publicKey, signMessage, connected, disconnect } = useWallet();
   const {
     walletAddress,
@@ -28,6 +34,7 @@ const Header: React.FC = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { formattedBalance, isLoading: isBalanceLoading } = useTokenBalance();
+  const { balance: platformBalance, formatBalance } = useBalance();
 
   const handleAuthenticate = useCallback(async () => {
     if (!publicKey || !signMessage) {
@@ -53,6 +60,7 @@ const Header: React.FC = () => {
       if (response.success) {
         setAuthToken(`${SERVER_API_KEY}:${response.authToken}`);
         gameApi.setAuthToken(`${SERVER_API_KEY}:${response.authToken}`);
+        balanceApi.setAuthToken(`${SERVER_API_KEY}:${response.authToken}`);
         console.log("Authentication successful:", response.message);
       } else {
         setError("Authentication failed");
@@ -127,9 +135,16 @@ const Header: React.FC = () => {
                 <span className="wallet-address">
                   {walletAddress?.slice(0, 4)}...{walletAddress?.slice(-4)}
                 </span>
-                <span className="token-balance">
-                  {isBalanceLoading ? "Loading..." : formattedBalance}
-                </span>
+                <div className="balance-info">
+                  <span className="wallet-balance" title="Wallet Balance">
+                    💼 {isBalanceLoading ? "Loading..." : formattedBalance}
+                  </span>
+                  {isAuthenticated && platformBalance && (
+                    <span className="platform-balance" title="Platform Balance">
+                      🎮 {formatBalance(platformBalance.balance)} CASH
+                    </span>
+                  )}
+                </div>
                 {isAuthenticated && (
                   <span className="auth-status">✓ Authenticated</span>
                 )}
@@ -137,6 +152,15 @@ const Header: React.FC = () => {
               <div className="wallet-actions">
                 {!isAuthenticated && isAuthenticating && (
                   <span className="auth-status">Authenticating...</span>
+                )}
+                {isAuthenticated && onNavigateToBalance && (
+                  <button
+                    onClick={onNavigateToBalance}
+                    className="balance-button"
+                    title="Manage Balance"
+                  >
+                    💰 Balance
+                  </button>
                 )}
                 <WalletDisconnectButton />
               </div>
