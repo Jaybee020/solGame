@@ -62,6 +62,15 @@ const coinMeta: {
 const ElegantFont = `'Playfair Display', serif`;
 const DigitalFont = `'Orbitron', sans-serif`;
 
+// Symbol data for the game - updated to match example format
+const symbolData = {
+  sol: { id: 'sol', name: 'Solana', image: '/assets/crypto-logos/sol.png', multiplier: 2, isWild: true },
+  btc: { id: 'btc', name: 'Bitcoin', image: '/assets/crypto-logos/btc.png', multiplier: 5, isWild: false },
+  eth: { id: 'eth', name: 'Ethereum', image: '/assets/crypto-logos/eth.png', multiplier: 1.6, isWild: false },
+  ada: { id: 'ada', name: 'Cardano', image: '/assets/crypto-logos/ada.png', multiplier: 1.2, isWild: false },
+  matic: { id: 'matic', name: 'Polygon', image: '/assets/crypto-logos/polygon.png', multiplier: 0.9, isWild: false },
+};
+
 // Helper Components
 const CryptoPriceTicker = ({ data }: { data: CryptoData[] | null }) => {
   const formatPrice = (price: number) => {
@@ -154,6 +163,26 @@ const DigitalDisplay = ({
   </div>
 );
 
+const SymbolCard = ({ symbolId }: { symbolId: string }) => {
+  const symbol = symbolData[symbolId as keyof typeof symbolData] || symbolData.sol;
+  return (
+    <div className="relative w-28 h-28 bg-damask-pattern bg-cover bg-center rounded-lg flex items-center justify-center p-2 border-2 border-yellow-700/50 shadow-lg">
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
+      <img src={symbol.image} alt={symbol.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+      {symbol.isWild && (
+        <div className="absolute top-1 left-1 text-yellow-300 text-2xl drop-shadow-md">
+          <motion.div
+            animate={{ scale: [1, 1.15, 1] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            ★
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface SlotsGameProps {
   gameState: GameState;
   playMove: (move: { action: string; data?: any }) => Promise<boolean>;
@@ -161,6 +190,28 @@ interface SlotsGameProps {
   betAmount: number;
   onNewGame: () => void;
 }
+
+const Reel = ({ symbols, delay, isSpinning }: { symbols: string[], delay: number, isSpinning: boolean }) => {
+  const allSymbols = Object.keys(symbolData);
+  const spinningReelSymbols = [...Array(20)].flatMap(() => allSymbols.sort(() => Math.random() - 0.5));
+
+  return (
+    <div className="h-[360px] w-[120px] overflow-hidden">
+      <motion.div
+        animate={{ y: isSpinning ? '-2400px' : '0px' }}
+        transition={{
+          duration: isSpinning ? 2.5 + delay : 0.8,
+          ease: isSpinning ? [0.33, 1, 0.68, 1] : 'circOut',
+        }}
+      >
+        {isSpinning
+          ? spinningReelSymbols.map((s, i) => <div key={i} className="py-2"><SymbolCard symbolId={s} /></div>)
+          : symbols.map((s, i) => <div key={i} className="py-2"><SymbolCard symbolId={s} /></div>)
+        }
+      </motion.div>
+    </div>
+  );
+};
 
 const SlotsGame: React.FC<SlotsGameProps> = ({
   gameState,
@@ -205,86 +256,6 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
   const isPlaying = gameState.status === "playing";
   const isCompleted = gameState.status === "completed";
 
-  // Crypto-themed symbols with images - updated to match new design
-  const symbols = [
-    {
-      id: "btc",
-      symbol: "₿",
-      name: "Bitcoin",
-      color: "#F7931A",
-      image: "/assets/crypto-logos/btc.png",
-      payout: 100,
-      glow: "#F7931A",
-      multiplier: 5,
-      isWild: false,
-    },
-    {
-      id: "eth",
-      symbol: "Ξ",
-      name: "Ethereum",
-      color: "#627EEA",
-      image: "/assets/crypto-logos/eth.png",
-      payout: 80,
-      glow: "#627EEA",
-      multiplier: 1.6,
-      isWild: false,
-    },
-    {
-      id: "sol",
-      symbol: "◎",
-      name: "Solana",
-      color: "#00FFA3",
-      image: "/assets/crypto-logos/sol.png",
-      payout: 60,
-      glow: "#00FFA3",
-      multiplier: 2,
-      isWild: true,
-    },
-    {
-      id: "ada",
-      symbol: "₳",
-      name: "Cardano",
-      color: "#0033AD",
-      image: "/assets/crypto-logos/ada.png",
-      payout: 40,
-      glow: "#0033AD",
-      multiplier: 1.2,
-      isWild: false,
-    },
-    {
-      id: "matic",
-      symbol: "◇",
-      name: "Polygon",
-      color: "#8247E5",
-      image: "/assets/crypto-logos/polygon.png",
-      payout: 30,
-      glow: "#8247E5",
-      multiplier: 0.9,
-      isWild: false,
-    },
-    {
-      id: "wild",
-      symbol: "💎",
-      name: "Diamond Wild",
-      color: "#00FFFF",
-      image: null,
-      payout: 200,
-      glow: "#00FFFF",
-      special: "wild",
-      multiplier: 10,
-      isWild: true,
-    },
-    {
-      id: "scatter",
-      symbol: "⭐",
-      name: "Star Scatter",
-      color: "#FFD700",
-      image: null,
-      payout: 150,
-      glow: "#FFD700",
-      special: "scatter",
-    },
-  ];
 
   // Win lines configuration
   const winLines = [
@@ -555,313 +526,23 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
     [windowSize, winningLines]
   );
 
-  const renderSymbol = (
-    symbolId: string,
-    reelIndex: number,
-    posIndex: number,
-    isAnimated = false
-  ) => {
-    const symbol = symbols.find((s) => s.id === symbolId) || symbols[0];
-    const shouldAnimate =
-      isAnimated && isSpinning && !showResult && !isCompleted;
-    const isWinningSymbol = winningLines.some((lineIndex) => {
-      const line = winLines[lineIndex];
-      return line.positions.some(
-        ([row, col]) => row === posIndex && col === reelIndex
-      );
-    });
 
-    return (
-      <div
-        className="symbol-container"
-        data-reel-index={reelIndex}
-        data-pos-index={posIndex}
-      >
-        <motion.div
-          key={`symbol-${gameState.sessionId}-${
-            showResult ? "result" : "spinning"
-          }-${reelIndex}-${posIndex}`}
-          animate={
-            shouldAnimate
-              ? {
-                  y: [-40, 40, -40],
-                  rotateY: [0, 180, 360],
-                  scale: [1, 1.1, 1],
-                }
-              : isWinningSymbol
-              ? {
-                  scale: [1, 1.15, 1],
-                  boxShadow: [
-                    `0 0 5px ${symbol.glow}`,
-                    `0 0 20px ${symbol.glow}`,
-                    `0 0 5px ${symbol.glow}`,
-                  ],
-                }
-              : {
-                  y: 0,
-                  rotateY: 0,
-                  scale: 1,
-                }
-          }
-          transition={{
-            duration: shouldAnimate ? 0.6 : 0.5,
-            repeat: shouldAnimate ? Infinity : isWinningSymbol ? Infinity : 0,
-            ease: shouldAnimate ? "easeInOut" : "easeOut",
-            delay: shouldAnimate ? reelIndex * 0.15 : 0,
-          }}
-          className="relative w-28 h-28 bg-damask-pattern bg-cover bg-center rounded-lg flex items-center justify-center p-2 border-2 border-yellow-700/50 shadow-lg transform-gpu overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-          {shouldAnimate ? (
-            <motion.div
-              animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-              transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-              className="text-3xl z-10"
-            >
-              🎰
-            </motion.div>
-          ) : (
-            <>
-              {symbol.image ? (
-                <img
-                  src={symbol.image}
-                  alt={symbol.name}
-                  className={`w-16 h-16 object-contain drop-shadow-lg z-10 ${
-                    isWinningSymbol ? "brightness-125" : ""
-                  }`}
-                  style={{
-                    filter: isWinningSymbol
-                      ? `drop-shadow(0 0 8px ${symbol.glow})`
-                      : "none",
-                  }}
-                />
-              ) : (
-                <div
-                  className={`text-4xl z-10 ${
-                    isWinningSymbol ? "animate-pulse" : ""
-                  }`}
-                  style={{
-                    color: symbol.color,
-                    textShadow: isWinningSymbol
-                      ? `0 0 10px ${symbol.glow}`
-                      : "none",
-                  }}
-                >
-                  {symbol.symbol}
-                </div>
-              )}
-              {symbol.isWild && (
-                <div className="absolute top-1 left-1 text-yellow-300 text-2xl drop-shadow-md z-10">
-                  <motion.div
-                    animate={{ scale: [1, 1.15, 1] }}
-                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-                  >
-                    ★
-                  </motion.div>
-                </div>
-              )}
-            </>
-          )}
-        </motion.div>
-      </div>
-    );
-  };
-
-  const renderSlotMachine = () => {
-    const reels =
-      (showResult || isCompleted) && spinResult?.reels
-        ? spinResult.reels
-        : gameData?.reels || [
-            ["btc", "eth", "sol"],
-            ["eth", "sol", "ada"],
-            ["sol", "ada", "dot"],
-            ["ada", "dot", "link"],
-            ["dot", "link", "btc"],
-          ];
-
-    const activeLineCount = enabledLines.filter(Boolean).length;
-
-    return (
-      <div className="relative">
-        {/* ATM-Style Slot Machine Container */}
-        <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 p-6 rounded-xl border-4 border-yellow-500 shadow-2xl">
-          {/* Gold corner decorations */}
-          <div className="absolute top-0 left-0 w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-br-lg"></div>
-          <div className="absolute top-0 right-0 w-6 h-6 bg-gradient-to-bl from-yellow-400 to-yellow-600 rounded-bl-lg"></div>
-          <div className="absolute bottom-0 left-0 w-6 h-6 bg-gradient-to-tr from-yellow-400 to-yellow-600 rounded-tr-lg"></div>
-          <div className="absolute bottom-0 right-0 w-6 h-6 bg-gradient-to-tl from-yellow-400 to-yellow-600 rounded-tl-lg"></div>
-
-          {/* Slot Display */}
-          <div
-            ref={reelContainerRef}
-            className="relative bg-black rounded-lg p-4 mb-6 shadow-inner"
-            style={{
-              background: "linear-gradient(to bottom, #000000, #1a1a2e)",
-              boxShadow: "inset 0 0 20px rgba(0,0,0,0.8)",
-            }}
-          >
-            <div className="grid grid-cols-5 gap-3">
-              {reels.map((reel: string[], reelIndex: number) => (
-                <div key={reelIndex} className="space-y-2">
-                  {reel.map((symbolId: string, symbolIndex: number) => (
-                    <div key={`${reelIndex}-${symbolIndex}`}>
-                      {renderSymbol(symbolId, reelIndex, symbolIndex, true)}
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-
-            {/* Win lines overlay */}
-            {winningLines.map((lineIndex) => {
-              const line = winLines[lineIndex];
-              const linePath = calculateWinLinePath(lineIndex);
-
-              return (
-                <div
-                  key={`line-${lineIndex}`}
-                  className="absolute inset-0 pointer-events-none"
-                  style={{ zIndex: 10 }}
-                >
-                  <svg className="w-full h-full">
-                    <path
-                      d={linePath}
-                      stroke={line.color}
-                      strokeWidth="4"
-                      fill="none"
-                      strokeDasharray="8,4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{
-                        animation: "dash 1s linear infinite",
-                      }}
-                    />
-                    {/* Add circles at connection points */}
-                    {line.positions.map(([row, col], idx) => {
-                      const symbolEl = document.querySelector(
-                        `[data-pos-index="${row}"][data-reel-index="${col}"]`
-                      );
-                      if (!symbolEl || !reelContainerRef.current) return null;
-
-                      const containerRect =
-                        reelContainerRef.current.getBoundingClientRect();
-                      const symbolRect = symbolEl.getBoundingClientRect();
-                      const x =
-                        symbolRect.left -
-                        containerRect.left +
-                        symbolRect.width / 2;
-                      const y =
-                        symbolRect.top -
-                        containerRect.top +
-                        symbolRect.height / 2;
-
-                      return (
-                        <circle
-                          key={`point-${lineIndex}-${idx}`}
-                          cx={x}
-                          cy={y}
-                          r={3}
-                          fill={line.color}
-                          style={{
-                            filter: `drop-shadow(0 0 4px ${line.color})`,
-                          }}
-                        />
-                      );
-                    })}
-                  </svg>
-                </div>
-              );
-            })}
-
-            {/* Spinning overlay */}
-            {isSpinning && (
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg">
-                <motion.div
-                  className="text-white text-2xl font-bold text-center"
-                  animate={{
-                    scale: [1, 1.2, 1],
-                    opacity: [0.7, 1, 0.7],
-                  }}
-                  transition={{
-                    duration: 1,
-                    repeat: Infinity,
-                  }}
-                >
-                  🎰 SPINNING... 🎰
-                </motion.div>
-              </div>
-            )}
-          </div>
-
-          {/* Controls */}
-          <div className="space-y-4">
-            {/* Bet and Spin Controls */}
-            {isPlaying && !isCompleted && (
-              <div className="bg-gray-800 rounded-lg p-4 space-y-3">
-                {/* Current Bet Display */}
-                <div className="text-center p-3 bg-gray-900 rounded-lg border border-yellow-500/30">
-                  <div className="text-sm text-gray-400 mb-1">Total Bet</div>
-                  <div className="text-2xl font-bold text-yellow-400">
-                    ${(betAmount * activeLineCount).toFixed(2)}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    {activeLineCount} line{activeLineCount !== 1 ? "s" : ""} × $
-                    {betAmount.toFixed(2)}
-                  </div>
-                </div>
-
-                {/* Spin Button */}
-                <motion.button
-                  onClick={handleSpin}
-                  disabled={isSpinning || showResult || gameData?.hasSpun}
-                  className="w-full bg-gradient-to-r from-red-600 to-red-800 text-white text-2xl font-bold py-4 rounded-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed border-2 border-red-400"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  {isSpinning ? (
-                    <div className="flex items-center justify-center space-x-3">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                        className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full"
-                      />
-                      <span>SPINNING...</span>
-                    </div>
-                  ) : showResult || gameData?.hasSpun ? (
-                    "🎰 SPIN COMPLETE 🎰"
-                  ) : (
-                    "🎰 SPIN TO WIN 🎰"
-                  )}
-                </motion.button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const renderPaytable = () => (
     <div className="card">
       <h3 className="text-lg font-semibold text-text-primary mb-4">Paytable</h3>
       <div className="grid grid-cols-2 gap-4">
-        {symbols.slice(0, 6).map((symbol) => (
+        {Object.values(symbolData).map((symbol) => (
           <div
             key={symbol.id}
             className="flex items-center space-x-3 p-2 bg-background-tertiary rounded"
           >
-            <div className="text-2xl" style={{ color: symbol.color }}>
-              {symbol.symbol}
-            </div>
+            <img src={symbol.image} alt={symbol.name} className="w-8 h-8" />
             <div>
               <div className="text-sm font-medium text-text-primary">
                 {symbol.name}
               </div>
-              <div className="text-xs text-text-secondary">5x = 100:1</div>
+              <div className="text-xs text-text-secondary">{symbol.multiplier}x multiplier</div>
             </div>
           </div>
         ))}
@@ -905,24 +586,7 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
                   ['ada', 'matic', 'btc'],
                   ['matic', 'btc', 'eth']
                 ]).map((reelSymbols: string[], i: number) => (
-                <div key={i} className="h-[360px] w-[120px] overflow-hidden">
-                  <motion.div
-                    animate={{ y: isSpinning ? '-2400px' : '0px' }}
-                    transition={{
-                      duration: isSpinning ? 2.5 + i * 0.15 : 0.8,
-                      ease: isSpinning ? [0.33, 1, 0.68, 1] : 'circOut',
-                    }}
-                  >
-                    {isSpinning
-                      ? [...Array(20)].flatMap(() => Object.keys(symbols.reduce((acc, s) => ({ ...acc, [s.id]: s }), {})).sort(() => Math.random() - 0.5)).map((symbolId, idx) => 
-                          <div key={idx} className="py-2">{renderSymbol(symbolId, i, Math.floor(idx / 5), true)}</div>
-                        )
-                      : reelSymbols.map((symbolId: string, symbolIndex: number) => (
-                          <div key={symbolIndex} className="py-2">{renderSymbol(symbolId, i, symbolIndex, true)}</div>
-                        ))
-                    }
-                  </motion.div>
-                </div>
+                <Reel key={i} symbols={reelSymbols} delay={i * 0.15} isSpinning={isSpinning} />
               ))}
             </div>
             
