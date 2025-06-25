@@ -7,7 +7,7 @@ import {
   GameMove,
 } from "../types/game";
 
-type CryptoTheme = "BTC" | "ETH" | "SOL";
+type CryptoTheme = "BTC" | "ETH" | "SOL" | "ADA" | "MATIC";
 
 interface SlotSymbol {
   id: string;
@@ -50,53 +50,20 @@ export class SlotsProvider extends BaseGameProvider {
   private readonly NUM_REELS = 5;
 
   private readonly SYMBOLS: SlotSymbol[] = [
-    // Fruit symbols (common) - any fruit combo gives 1.5x
+    // Crypto symbols matching frontend symbolData
     {
-      id: "cherry",
-      name: "Cherry",
-      weight: 150,
-      multipliers: { 3: 1.5, 4: 3, 5: 6 },
+      id: "sol",
+      name: "Solana",
+      weight: 20,
+      multipliers: { 3: 2, 4: 4, 5: 8 },
+      isCrypto: true,
+      theme: "SOL",
     },
-    {
-      id: "lemon",
-      name: "Lemon",
-      weight: 150,
-      multipliers: { 3: 1.5, 4: 3, 5: 6 },
-    },
-    {
-      id: "orange",
-      name: "Orange",
-      weight: 150,
-      multipliers: { 3: 1.5, 4: 3, 5: 6 },
-    },
-    {
-      id: "plum",
-      name: "Plum",
-      weight: 150,
-      multipliers: { 3: 1.5, 4: 3, 5: 6 },
-    },
-
-    // Mid-tier symbols
-    {
-      id: "bell",
-      name: "Bell",
-      weight: 100,
-      multipliers: { 3: 2, 4: 5, 5: 10 },
-    },
-    { id: "bar", name: "Bar", weight: 80, multipliers: { 3: 3, 4: 8, 5: 15 } },
-    {
-      id: "seven",
-      name: "Seven",
-      weight: 60,
-      multipliers: { 3: 5, 4: 12, 5: 20 },
-    },
-
-    // Crypto symbols (rare)
     {
       id: "btc",
       name: "Bitcoin",
       weight: 10,
-      multipliers: { 3: 25, 4: 50, 5: 100 },
+      multipliers: { 3: 5, 4: 10, 5: 25 },
       isCrypto: true,
       theme: "BTC",
     },
@@ -104,17 +71,25 @@ export class SlotsProvider extends BaseGameProvider {
       id: "eth",
       name: "Ethereum",
       weight: 15,
-      multipliers: { 3: 20, 4: 40, 5: 80 },
+      multipliers: { 3: 1.6, 4: 3.2, 5: 8 },
       isCrypto: true,
       theme: "ETH",
     },
     {
-      id: "sol",
-      name: "Solana",
-      weight: 20,
-      multipliers: { 3: 15, 4: 30, 5: 60 },
+      id: "ada",
+      name: "Cardano",
+      weight: 25,
+      multipliers: { 3: 1.2, 4: 2.4, 5: 6 },
       isCrypto: true,
-      theme: "SOL",
+      theme: "ADA",
+    },
+    {
+      id: "matic",
+      name: "Polygon",
+      weight: 30,
+      multipliers: { 3: 0.9, 4: 1.8, 5: 4.5 },
+      isCrypto: true,
+      theme: "MATIC",
     },
   ];
 
@@ -348,17 +323,7 @@ export class SlotsProvider extends BaseGameProvider {
       }
     }
 
-    // Check for any fruit combination (different fruits)
-    if (consecutiveCount < 3) {
-      const fruitSymbols = ["cherry", "lemon", "orange", "plum"];
-      const fruitCount = line.filter((symbol) =>
-        fruitSymbols.includes(symbol)
-      ).length;
-
-      if (fruitCount >= 3) {
-        return { multiplier: 1.5, count: fruitCount };
-      }
-    }
+    // No fruit combination logic needed with crypto-only symbols
 
     if (consecutiveCount >= 3) {
       const symbol = this.getSymbolById(firstSymbol);
@@ -386,7 +351,7 @@ export class SlotsProvider extends BaseGameProvider {
 
   // Method to get available themes
   getAvailableThemes(): CryptoTheme[] {
-    return ["BTC", "ETH", "SOL"];
+    return ["BTC", "ETH", "SOL", "ADA", "MATIC"];
   }
 
   // Method to get symbol information for a theme

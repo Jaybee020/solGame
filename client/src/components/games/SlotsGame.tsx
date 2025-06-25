@@ -64,11 +64,41 @@ const DigitalFont = `'Orbitron', sans-serif`;
 
 // Symbol data for the game - updated to match example format
 const symbolData = {
-  sol: { id: 'sol', name: 'Solana', image: '/assets/crypto-logos/sol.png', multiplier: 2, isWild: true },
-  btc: { id: 'btc', name: 'Bitcoin', image: '/assets/crypto-logos/btc.png', multiplier: 5, isWild: false },
-  eth: { id: 'eth', name: 'Ethereum', image: '/assets/crypto-logos/eth.png', multiplier: 1.6, isWild: false },
-  ada: { id: 'ada', name: 'Cardano', image: '/assets/crypto-logos/ada.png', multiplier: 1.2, isWild: false },
-  matic: { id: 'matic', name: 'Polygon', image: '/assets/crypto-logos/polygon.png', multiplier: 0.9, isWild: false },
+  sol: {
+    id: "sol",
+    name: "Solana",
+    image: "/assets/crypto-logos/sol.png",
+    multiplier: 2,
+    isWild: true,
+  },
+  btc: {
+    id: "btc",
+    name: "Bitcoin",
+    image: "/assets/crypto-logos/btc.png",
+    multiplier: 5,
+    isWild: false,
+  },
+  eth: {
+    id: "eth",
+    name: "Ethereum",
+    image: "/assets/crypto-logos/eth.png",
+    multiplier: 1.6,
+    isWild: false,
+  },
+  ada: {
+    id: "ada",
+    name: "Cardano",
+    image: "/assets/crypto-logos/ada.png",
+    multiplier: 1.2,
+    isWild: false,
+  },
+  matic: {
+    id: "matic",
+    name: "Polygon",
+    image: "/assets/crypto-logos/polygon.png",
+    multiplier: 0.9,
+    isWild: false,
+  },
 };
 
 // Helper Components
@@ -164,16 +194,21 @@ const DigitalDisplay = ({
 );
 
 const SymbolCard = ({ symbolId }: { symbolId: string }) => {
-  const symbol = symbolData[symbolId as keyof typeof symbolData] || symbolData.sol;
+  const symbol =
+    symbolData[symbolId as keyof typeof symbolData] || symbolData.sol;
   return (
     <div className="relative w-28 h-28 bg-damask-pattern bg-cover bg-center rounded-lg flex items-center justify-center p-2 border-2 border-yellow-700/50 shadow-lg">
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-lg"></div>
-      <img src={symbol.image} alt={symbol.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+      <img
+        src={symbol.image}
+        alt={symbol.name}
+        className="w-16 h-16 object-contain drop-shadow-lg"
+      />
       {symbol.isWild && (
         <div className="absolute top-1 left-1 text-yellow-300 text-2xl drop-shadow-md">
           <motion.div
             animate={{ scale: [1, 1.15, 1] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           >
             ★
           </motion.div>
@@ -191,23 +226,47 @@ interface SlotsGameProps {
   onNewGame: () => void;
 }
 
-const Reel = ({ symbols, delay, isSpinning }: { symbols: string[], delay: number, isSpinning: boolean }) => {
+const Reel = ({
+  symbols,
+  delay,
+  isSpinning,
+  reelIndex,
+}: {
+  symbols: string[];
+  delay: number;
+  isSpinning: boolean;
+  reelIndex: number;
+}) => {
   const allSymbols = Object.keys(symbolData);
-  const spinningReelSymbols = [...Array(20)].flatMap(() => allSymbols.sort(() => Math.random() - 0.5));
+  const spinningReelSymbols = [...Array(20)].flatMap(() =>
+    allSymbols.sort(() => Math.random() - 0.5)
+  );
 
   return (
     <div className="h-[360px] w-[120px] overflow-hidden">
       <motion.div
-        animate={{ y: isSpinning ? '-2400px' : '0px' }}
+        animate={{ y: isSpinning ? "-2400px" : "0px" }}
         transition={{
           duration: isSpinning ? 2.5 + delay : 0.8,
-          ease: isSpinning ? [0.33, 1, 0.68, 1] : 'circOut',
+          ease: isSpinning ? [0.33, 1, 0.68, 1] : "circOut",
         }}
       >
         {isSpinning
-          ? spinningReelSymbols.map((s, i) => <div key={i} className="py-2"><SymbolCard symbolId={s} /></div>)
-          : symbols.map((s, i) => <div key={i} className="py-2"><SymbolCard symbolId={s} /></div>)
-        }
+          ? spinningReelSymbols.map((s, i) => (
+              <div key={i} className="py-2">
+                <SymbolCard symbolId={s} />
+              </div>
+            ))
+          : symbols.map((s, i) => (
+              <div
+                key={i}
+                className="py-2 symbol-container"
+                data-reel-index={reelIndex}
+                data-pos-index={i}
+              >
+                <SymbolCard symbolId={s} />
+              </div>
+            ))}
       </motion.div>
     </div>
   );
@@ -224,6 +283,9 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
   const [isSpinning, setIsSpinning] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [spinResult, setSpinResult] = useState<any>(null);
+  const [persistentReels, setPersistentReels] = useState<string[][] | null>(
+    null
+  );
   const [spinSound] = useState(() => {
     try {
       const audio = new Audio("/assets/sounds/spin.mp3");
@@ -251,11 +313,11 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
       return null;
     }
   });
+  console.log(gameState);
 
-  const gameData = gameState.gameData;
+  const gameData = gameState.result?.gameData;
   const isPlaying = gameState.status === "playing";
   const isCompleted = gameState.status === "completed";
-
 
   // Win lines configuration
   const winLines = [
@@ -392,9 +454,23 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
       setShowResult(true);
       setIsSpinning(false);
 
-      // Update winning lines
-      if (result?.winningLines) {
-        setWinningLines(result.winningLines);
+      // Update winning lines based on backend paylines
+      if (result?.paylines && Array.isArray(result.paylines)) {
+        // Convert backend paylines to frontend winning line indices
+        const winningLineIndices: number[] = [];
+        result.paylines.forEach((payline: any, index: number) => {
+          // Map backend paylines to frontend win line indices
+          // Assuming first 3 paylines are horizontal (rows 0,1,2) and next 2 are diagonals
+          if (index < 5) {
+            winningLineIndices.push(index);
+          }
+        });
+        setWinningLines(winningLineIndices);
+      }
+
+      // Persist the reels from the backend result
+      if (result?.reels) {
+        setPersistentReels(result.reels);
       }
 
       // Play sound effects
@@ -426,12 +502,13 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
     bigWinSound,
   ]);
 
-  // Reset state when game starts
+  // Reset state when game starts (but keep persistent reels)
   useEffect(() => {
     if (isPlaying && !isCompleted) {
       setShowResult(false);
       setSpinResult(null);
       setIsSpinning(false);
+      // Don't reset persistentReels - they should persist across games
     }
   }, [isPlaying, isCompleted]);
 
@@ -526,8 +603,6 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
     [windowSize, winningLines]
   );
 
-
-
   const renderPaytable = () => (
     <div className="card">
       <h3 className="text-lg font-semibold text-text-primary mb-4">Paytable</h3>
@@ -542,7 +617,9 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
               <div className="text-sm font-medium text-text-primary">
                 {symbol.name}
               </div>
-              <div className="text-xs text-text-secondary">{symbol.multiplier}x multiplier</div>
+              <div className="text-xs text-text-secondary">
+                {symbol.multiplier}x multiplier
+              </div>
             </div>
           </div>
         ))}
@@ -562,41 +639,59 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
   return (
     <>
       <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-        
         <CryptoPriceTicker data={cryptoData} />
 
         <div className="relative w-full max-w-lg bg-gradient-to-b from-gray-800 via-black to-gray-800 rounded-3xl p-4 border-8 border-t-yellow-300 border-l-yellow-400 border-r-yellow-600 border-b-yellow-700 shadow-2xl shadow-black/50 mt-4">
-
           <header className="text-center mb-4 p-2 bg-gradient-to-b from-purple-900 via-black to-purple-900 rounded-lg border-2 border-yellow-700/50">
-            <h1 className="text-3xl text-yellow-200 glow-text-yellow" style={{ fontFamily: ElegantFont }}>
+            <h1
+              className="text-3xl text-yellow-200 glow-text-yellow"
+              style={{ fontFamily: ElegantFont }}
+            >
               Solana Cash Machine
             </h1>
-            <h2 className="text-md text-cyan-300 tracking-widest" style={{ fontFamily: DigitalFont }}>THE PREMIER SOLANA SLOTS</h2>
+            <h2
+              className="text-md text-cyan-300 tracking-widest"
+              style={{ fontFamily: DigitalFont }}
+            >
+              THE PREMIER SOLANA SLOTS
+            </h2>
           </header>
 
           <main className="relative bg-black rounded-lg p-4 border-4 border-black shadow-inner-strong mb-4">
             <div className="absolute inset-0 bg-damask-pattern opacity-10 bg-repeat"></div>
-            <div ref={reelContainerRef} className="flex justify-around items-center">
-              {((showResult || isCompleted) && spinResult?.reels ? 
-                spinResult.reels : 
-                gameData?.reels || [
-                  ['btc', 'eth', 'sol'],
-                  ['eth', 'sol', 'ada'],
-                  ['sol', 'ada', 'matic'],
-                  ['ada', 'matic', 'btc'],
-                  ['matic', 'btc', 'eth']
-                ]).map((reelSymbols: string[], i: number) => (
-                <Reel key={i} symbols={reelSymbols} delay={i * 0.15} isSpinning={isSpinning} />
+            <div
+              ref={reelContainerRef}
+              className="flex justify-around items-center"
+            >
+              {(
+                persistentReels ||
+                ((showResult || isCompleted) && spinResult?.reels
+                  ? spinResult.reels
+                  : gameData?.reels || [
+                      ["btc", "eth", "sol"],
+                      ["eth", "sol", "ada"],
+                      ["sol", "ada", "matic"],
+                      ["ada", "matic", "btc"],
+                      ["matic", "btc", "eth"],
+                    ])
+              ).map((reelSymbols: string[], i: number) => (
+                <Reel
+                  key={i}
+                  symbols={reelSymbols}
+                  delay={i * 0.15}
+                  isSpinning={isSpinning}
+                  reelIndex={i}
+                />
               ))}
             </div>
-            
+
             {/* Win lines overlay */}
             {winningLines.map((lineIndex) => {
               const line = winLines[lineIndex];
               const linePath = calculateWinLinePath(lineIndex);
-              
+
               return (
-                <div 
+                <div
                   key={`line-${lineIndex}`}
                   className="absolute inset-0 pointer-events-none"
                   style={{ zIndex: 10 }}
@@ -611,95 +706,151 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       style={{
-                        animation: 'dash 1s linear infinite',
+                        animation: "dash 1s linear infinite",
                       }}
                     />
                   </svg>
                 </div>
               );
             })}
-            
+
             {/* Spinning overlay */}
             {isSpinning && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-lg">
-                <motion.div 
+                <motion.div
                   className="text-white text-2xl font-bold text-center"
-                  animate={{ 
+                  animate={{
                     scale: [1, 1.2, 1],
-                    opacity: [0.7, 1, 0.7]
+                    opacity: [0.7, 1, 0.7],
                   }}
-                  transition={{ 
+                  transition={{
                     duration: 1,
-                    repeat: Infinity
+                    repeat: Infinity,
                   }}
                 >
                   🎰 SPINNING... 🎰
                 </motion.div>
               </div>
             )}
-            
+
             <div className="absolute inset-0 glass-pane pointer-events-none"></div>
           </main>
 
           <footer className="bg-gradient-to-b from-gray-900 to-gray-800 p-4 rounded-lg border-2 border-yellow-900/50 shadow-inner-strong">
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <DigitalDisplay 
-                label="Balance" 
-                value={(100 + (gameState.result?.winAmount || 0) - betAmount * enabledLines.filter(Boolean).length).toFixed(2)} 
-                isCurrency 
+              <DigitalDisplay
+                label="Balance"
+                value={(
+                  100 +
+                  (gameState.result?.winAmount || 0) -
+                  betAmount * enabledLines.filter(Boolean).length
+                ).toFixed(2)}
+                isCurrency
               />
-              <DigitalDisplay 
-                label="Total Bet" 
-                value={(betAmount * enabledLines.filter(Boolean).length).toFixed(2)} 
-                isCurrency 
+              <DigitalDisplay
+                label="Total Bet"
+                value={(
+                  betAmount * enabledLines.filter(Boolean).length
+                ).toFixed(2)}
+                isCurrency
               />
-              <DigitalDisplay 
-                label="Win" 
-                value={(gameState.result?.winAmount || 0).toFixed(2)} 
-                isCurrency 
+              <DigitalDisplay
+                label="Win"
+                value={(gameState.result?.winAmount || 0).toFixed(2)}
+                isCurrency
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4 items-center">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-bold" style={{ fontFamily: DigitalFont }}>BET</span>
+                  <span
+                    className="text-white font-bold"
+                    style={{ fontFamily: DigitalFont }}
+                  >
+                    BET
+                  </span>
                   <div className="flex items-center space-x-2">
-                    <button disabled={isSpinning} onClick={() => {/* Handle bet decrease */}} className="control-button-sm disabled:opacity-50">-</button>
-                    <span className="text-white text-xl w-8 text-center" style={{ fontFamily: DigitalFont }}>{betAmount}</span>
-                    <button disabled={isSpinning} onClick={() => {/* Handle bet increase */}} className="control-button-sm disabled:opacity-50">+</button>
+                    <button
+                      disabled={isSpinning}
+                      onClick={() => {
+                        /* Handle bet decrease */
+                      }}
+                      className="control-button-sm disabled:opacity-50"
+                    >
+                      -
+                    </button>
+                    <span
+                      className="text-white text-xl w-8 text-center"
+                      style={{ fontFamily: DigitalFont }}
+                    >
+                      {betAmount}
+                    </span>
+                    <button
+                      disabled={isSpinning}
+                      onClick={() => {
+                        /* Handle bet increase */
+                      }}
+                      className="control-button-sm disabled:opacity-50"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-bold" style={{ fontFamily: DigitalFont }}>LINES</span>
+                  <span
+                    className="text-white font-bold"
+                    style={{ fontFamily: DigitalFont }}
+                  >
+                    LINES
+                  </span>
                   <div className="flex items-center space-x-2">
-                    <button disabled={isSpinning} onClick={() => {
-                      const currentActive = enabledLines.filter(Boolean).length;
-                      if (currentActive > 1) {
-                        const newLines = [...enabledLines];
-                        for (let i = newLines.length - 1; i >= 0; i--) {
-                          if (newLines[i]) {
-                            newLines[i] = false;
-                            break;
+                    <button
+                      disabled={isSpinning}
+                      onClick={() => {
+                        const currentActive =
+                          enabledLines.filter(Boolean).length;
+                        if (currentActive > 1) {
+                          const newLines = [...enabledLines];
+                          for (let i = newLines.length - 1; i >= 0; i--) {
+                            if (newLines[i]) {
+                              newLines[i] = false;
+                              break;
+                            }
                           }
+                          setEnabledLines(newLines);
                         }
-                        setEnabledLines(newLines);
-                      }
-                    }} className="control-button-sm disabled:opacity-50">-</button>
-                    <span className="text-white text-xl w-8 text-center" style={{ fontFamily: DigitalFont }}>{enabledLines.filter(Boolean).length}</span>
-                    <button disabled={isSpinning} onClick={() => {
-                      const currentActive = enabledLines.filter(Boolean).length;
-                      if (currentActive < 5) {
-                        const newLines = [...enabledLines];
-                        for (let i = 0; i < newLines.length; i++) {
-                          if (!newLines[i]) {
-                            newLines[i] = true;
-                            break;
+                      }}
+                      className="control-button-sm disabled:opacity-50"
+                    >
+                      -
+                    </button>
+                    <span
+                      className="text-white text-xl w-8 text-center"
+                      style={{ fontFamily: DigitalFont }}
+                    >
+                      {enabledLines.filter(Boolean).length}
+                    </span>
+                    <button
+                      disabled={isSpinning}
+                      onClick={() => {
+                        const currentActive =
+                          enabledLines.filter(Boolean).length;
+                        if (currentActive < 5) {
+                          const newLines = [...enabledLines];
+                          for (let i = 0; i < newLines.length; i++) {
+                            if (!newLines[i]) {
+                              newLines[i] = true;
+                              break;
+                            }
                           }
+                          setEnabledLines(newLines);
                         }
-                        setEnabledLines(newLines);
-                      }
-                    }} className="control-button-sm disabled:opacity-50">+</button>
+                      }}
+                      className="control-button-sm disabled:opacity-50"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
               </div>
@@ -710,8 +861,11 @@ const SlotsGame: React.FC<SlotsGameProps> = ({
                 className="spin-button"
                 whileTap={!isSpinning ? { scale: 0.95, y: 2 } : {}}
               >
-                <span className="text-4xl font-black tracking-wider" style={{ fontFamily: DigitalFont }}>
-                  {isSpinning ? '...' : 'SPIN'}
+                <span
+                  className="text-4xl font-black tracking-wider"
+                  style={{ fontFamily: DigitalFont }}
+                >
+                  {isSpinning ? "..." : "SPIN"}
                 </span>
               </motion.button>
             </div>
