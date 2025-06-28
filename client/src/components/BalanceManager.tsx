@@ -143,7 +143,7 @@ const BalanceManager: React.FC<BalanceManagerProps> = ({ onBalanceUpdate }) => {
       return;
     }
 
-    if (balance && amount > balance.balance / 1e9) {
+    if (balance && amount > balance.balance) {
       setError("Insufficient balance");
       return;
     }
@@ -156,7 +156,7 @@ const BalanceManager: React.FC<BalanceManagerProps> = ({ onBalanceUpdate }) => {
       const lamports = Math.floor(amount * 1e9);
 
       const withdrawResult = await balanceApi.withdraw(
-        lamports,
+        amount,
         publicKey.toString(),
         `withdraw_${Date.now()}`
       );
@@ -166,10 +166,10 @@ const BalanceManager: React.FC<BalanceManagerProps> = ({ onBalanceUpdate }) => {
         await fetchBalance();
         await fetchHistory();
       } else {
-        setError(withdrawResult.error || "Failed to process withdrawal");
+        setError("Failed to process withdrawal. Contact support for more info");
       }
     } catch (err) {
-      setError("Failed to process withdrawal");
+      setError("Failed to process withdrawal. Contact support for more info");
       console.error("Withdrawal error:", err);
     } finally {
       setWithdrawing(false);

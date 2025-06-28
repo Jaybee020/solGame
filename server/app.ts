@@ -46,7 +46,7 @@ async function Mainrun() {
     app.use("/auth", authRouter);
     app.use("/games", gameRouter);
     app.use("/balance", balanceRouter);
-    payOutWorker.start();
+    // payOutWorker.start();
     //@ts-ignore
     httpServer.listen(PORT, "0.0.0.0", async (error) => {
       consoleLogger.info("Started listening on port", PORT);
