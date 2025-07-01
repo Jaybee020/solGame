@@ -134,7 +134,10 @@ export class GameEngine {
 
       // First check if user has sufficient balance
       const userObjectId = new Types.ObjectId(userId);
-      const hasBalance = await this.balanceService.hasBalance(userObjectId, request.betAmount);
+      const hasBalance = await this.balanceService.hasBalance(
+        userObjectId,
+        request.betAmount
+      );
 
       if (!hasBalance) {
         throw new Error("Insufficient balance");
@@ -181,7 +184,10 @@ export class GameEngine {
 
       if (!balanceResult.success) {
         // If balance deduction fails, cancel the session
-        await this.sessionService.cancelSession(session.id, "Balance deduction failed");
+        await this.sessionService.cancelSession(
+          session.id,
+          "Balance deduction failed"
+        );
         throw new Error(balanceResult.error || "Failed to deduct balance");
       }
 
@@ -377,6 +383,8 @@ export class GameEngine {
           ? this.sanitizeGameData(session.currentState?.currentData)
           : undefined,
         serverSeedHash: session.serverSeedHash,
+        updatedAt: session.updatedAt,
+        createdAt: session.createdAt,
       }));
     } catch (error) {
       throw new Error(
